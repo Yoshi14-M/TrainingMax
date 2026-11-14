@@ -71,6 +71,49 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * 有効なスタッフ（owner / trainer で、停止されていない）。
+     */
+    public function isActiveStaff(): bool
+    {
+        return $this->isStaff() && ! $this->isSuspended();
+    }
+
+    /**
+     * 対象の利用者の記録にアクセスできるか（セキュリティ設計書3.2。すべての認可の土台）。
+     *
+     * ① 本人、または ② 同じジムに現在所属している有効なスタッフ。
+     * 紐付けを解除した利用者は gym_id が NULL になるため、スタッフはアクセスできなくなる。
+     */
+    public function canAccessRecordsOf(User $client): bool
+    {
+        if (! $client->isClient()) {
+            return false;
+        }
+
+        if ($this->is($client)) {
+            return true;
+        }
+
+        return $this->isActiveStaff()
+            && $this->gym_id !== null
+            && $this->gym_id === $client->gym_id;
+    }
+
+    /**
+     * 停止中のユーザーにはパスワードリセットのメールを送らない（セキュリティ設計書5.3）。
+     *
+     * @param  string  $token
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        if ($this->isSuspended()) {
+            return;
+        }
+
+        parent::sendPasswordResetNotification($token);
+    }
+
+    /**
      * @param  Builder<User>  $query
      */
     public function scopeClients(Builder $query): void

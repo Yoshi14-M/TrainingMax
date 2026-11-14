@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
@@ -65,7 +66,16 @@ class FortifyServiceProvider extends ServiceProvider
                 return null;
             }
 
-            return Hash::check((string) $request->input('password'), $user->password) ? $user : null;
+            if (! Hash::check((string) $request->input('password'), $user->password)) {
+                return null;
+            }
+
+            // パスワードが正しい場合のみ、停止中であることを伝える（停止状態を第三者に推測させないため）
+            if ($user->isSuspended()) {
+                throw ValidationException::withMessages([Fortify::username() => __('auth.suspended')]);
+            }
+
+            return $user;
         });
 
         // 「ログイン状態を保持する」の有効期間（Laravel の初期値は約400日）
