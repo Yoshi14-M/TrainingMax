@@ -2,17 +2,25 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\Gender;
+use App\Enums\UserRole;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+/**
+ * role・gym_id・suspended_at・email_verified_at・password は一括代入できない。
+ * 処理の中で forceFill() などにより明示的に設定する（セキュリティ設計書4.6）。
+ */
+#[Fillable(['name', 'email', 'height_cm', 'birth_date', 'gender'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -25,8 +33,56 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'role' => UserRole::class,
+            'gender' => Gender::class,
             'email_verified_at' => 'datetime',
+            'suspended_at' => 'datetime',
+            'birth_date' => 'date',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * @return BelongsTo<Gym, $this>
+     */
+    public function gym(): BelongsTo
+    {
+        return $this->belongsTo(Gym::class);
+    }
+
+    public function isOwner(): bool
+    {
+        return $this->role === UserRole::Owner;
+    }
+
+    public function isStaff(): bool
+    {
+        return in_array($this->role, [UserRole::Owner, UserRole::Trainer], true);
+    }
+
+    public function isClient(): bool
+    {
+        return $this->role === UserRole::Client;
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null;
+    }
+
+    /**
+     * @param  Builder<User>  $query
+     */
+    public function scopeClients(Builder $query): void
+    {
+        $query->where('role', UserRole::Client);
+    }
+
+    /**
+     * @param  Builder<User>  $query
+     */
+    public function scopeTrainers(Builder $query): void
+    {
+        $query->where('role', UserRole::Trainer);
     }
 }
