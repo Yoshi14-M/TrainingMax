@@ -21,4 +21,12 @@ class Gym extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    /**
+     * @return HasMany<Exercise, $this>
+     */
+    public function exercises(): HasMany
+    {
+        return $this->hasMany(Exercise::class);
+    }
 }

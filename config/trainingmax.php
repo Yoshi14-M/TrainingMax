@@ -22,4 +22,18 @@ return [
         'password_reset' => (int) env('RATE_LIMIT_PASSWORD_RESET', 6),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | 初期データ（Seeder）の設定
+    |--------------------------------------------------------------------------
+    | オーナーのメールアドレス・パスワードは .env で指定する（未設定ならシーダーはエラーにする）
+    */
+
+    'seed' => [
+        'gym_name' => env('SEED_GYM_NAME', 'TrainingMax ジム'),
+        'owner_name' => env('SEED_OWNER_NAME', 'オーナー'),
+        'owner_email' => env('SEED_OWNER_EMAIL'),
+        'owner_password' => env('SEED_OWNER_PASSWORD'),
+    ],
+
 ];
