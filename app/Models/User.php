@@ -60,6 +60,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return in_array($this->role, [UserRole::Owner, UserRole::Trainer], true);
     }
 
+    public function isTrainer(): bool
+    {
+        return $this->role === UserRole::Trainer;
+    }
+
     public function isClient(): bool
     {
         return $this->role === UserRole::Client;
