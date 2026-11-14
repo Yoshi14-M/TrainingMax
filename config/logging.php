@@ -65,6 +65,15 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // 操作ログ（セキュリティ設計書8章）。storage/logs/audit-YYYY-MM-DD.log に日ごとに出力し、90日保存する
+        'audit' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/audit.log'),
+            'level' => 'info',
+            'max_files' => (int) env('AUDIT_LOG_DAYS', 90),
+            'replace_placeholders' => true,
+        ],
+
         'daily' => [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),

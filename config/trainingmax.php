@@ -20,6 +20,7 @@ return [
         'login' => (int) env('RATE_LIMIT_LOGIN', 5),
         'register' => (int) env('RATE_LIMIT_REGISTER', 6),
         'password_reset' => (int) env('RATE_LIMIT_PASSWORD_RESET', 6),
+        'initial_password_mail' => (int) env('RATE_LIMIT_INITIAL_PASSWORD_MAIL', 1),
     ],
 
     // Strict-Transport-Security の max-age（秒。本番のみ送る）
