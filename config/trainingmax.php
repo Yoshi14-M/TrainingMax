@@ -22,6 +22,9 @@ return [
         'password_reset' => (int) env('RATE_LIMIT_PASSWORD_RESET', 6),
     ],
 
+    // Strict-Transport-Security の max-age（秒。本番のみ送る）
+    'hsts_max_age' => (int) env('HSTS_MAX_AGE', 31536000),
+
     /*
     |--------------------------------------------------------------------------
     | 初期データ（Seeder）の設定
