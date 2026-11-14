@@ -93,10 +93,19 @@ return [
     */
 
     'passwords' => [
+        // パスワードリセット（S-04）：60分
         'users' => [
             'provider' => 'users',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
-            'expire' => 60,
+            'expire' => (int) env('AUTH_PASSWORD_RESET_EXPIRE', 60),
+            'throttle' => 60,
+        ],
+
+        // スタッフが発行したアカウントのパスワード初回設定：72時間（4320分）。保存先は users と同じ
+        'initial' => [
+            'provider' => 'users',
+            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            'expire' => (int) env('AUTH_INITIAL_PASSWORD_EXPIRE', 4320),
             'throttle' => 60,
         ],
     ],
