@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Support\Audit;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -25,5 +29,21 @@ class AppServiceProvider extends ServiceProvider
         // スタッフのIDなどを指定した場合は 404 になる（アーキテクチャ設計書4.3）。
         Route::bind('client', fn (string $value): User => User::query()->clients()->findOrFail($value));
         Route::bind('trainer', fn (string $value): User => User::query()->trainers()->findOrFail($value));
+
+        // 招待コードの入力：1ユーザーにつき 5回／分 かつ 20回／時。成功・失敗・形式不正を問わず数える。
+        // 同じユーザーに2つの制限をかけるため、キーを分ける（同じキーだと回数が混ざる）。
+        RateLimiter::for('invitation-code', function (Request $request) {
+            $response = function (Request $request, array $headers) {
+                Audit::log('invitation_code.rate_limited', ['user_id' => $request->user()?->id, 'ip' => $request->ip()]);
+
+                return back()->with('error', __('auth.invitation_code_throttle'));
+            };
+            $id = $request->user()?->id ?? $request->ip();
+
+            return [
+                Limit::perMinute(config('trainingmax.rate_limits.invitation_code_per_minute'))->by('minute:'.$id)->response($response),
+                Limit::perHour(config('trainingmax.rate_limits.invitation_code_per_hour'))->by('hour:'.$id)->response($response),
+            ];
+        });
     }
 }

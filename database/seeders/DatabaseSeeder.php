@@ -8,6 +8,7 @@ class DatabaseSeeder extends Seeder
 {
     /**
      * 初期データ（マスタ・デフォルト種目・ジム・オーナー）。
+     * local 環境では、動作確認用のテストユーザーも作成する（本番では実行しない）。
      */
     public function run(): void
     {
@@ -18,5 +19,9 @@ class DatabaseSeeder extends Seeder
             GymSeeder::class,
             OwnerSeeder::class,
         ]);
+
+        if (app()->environment('local')) {
+            $this->call(DevelopmentSeeder::class);
+        }
     }
 }
