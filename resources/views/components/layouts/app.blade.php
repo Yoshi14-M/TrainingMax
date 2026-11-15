@@ -1,4 +1,4 @@
-@props(['title' => null])
+@props(['title' => null, 'actions' => null])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -35,7 +35,13 @@
         @endif
 
         @if ($title)
-            <h1 class="mb-4 text-xl font-semibold">{{ $title }}</h1>
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                <h1 class="text-xl font-semibold">{{ $title }}</h1>
+                {{-- タイトルの横に置く操作（例：この日の記録を削除） --}}
+                @isset($actions)
+                    {{ $actions }}
+                @endisset
+            </div>
         @endif
 
         {{ $slot }}
