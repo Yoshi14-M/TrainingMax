@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class WorkoutSetFactory extends Factory
 {
     /**
-     * 推定1RM・ボリュームの計算は #7 で実装するまでの間、Factory で値を入れる。
+     * 推定1RM・セットボリュームは、保存時にモデルが計算する。
      *
      * @return array<string, mixed>
      */
@@ -25,8 +25,6 @@ class WorkoutSetFactory extends Factory
             'reps' => 8,
             'target_rir' => 2,
             'actual_rir' => 2,
-            'estimated_1rm' => 60 * (1 + (8 + 2) / 30),
-            'set_volume' => 60 * 8,
             'created_by' => fn (array $attributes) => SessionExercise::find($attributes['session_exercise_id'])->workoutSession->user_id,
             'updated_by' => fn (array $attributes) => $attributes['created_by'],
         ];

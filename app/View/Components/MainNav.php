@@ -31,8 +31,10 @@ class MainNav extends Component
         if ($routeClient instanceof User) {
             // 利用者の記録を表示中（利用者本人、または表示対象を選んだスタッフ）
             $this->target = $user->is($routeClient) ? null : $routeClient;
+            $this->items[] = $this->item('記録', route('records.sessions.today', $routeClient), $request->routeIs('records.sessions.*', 'records.sets.*'));
             $this->items[] = $this->item('種目', route('records.exercises.index', $routeClient), $request->routeIs('records.exercises.*'));
         } elseif ($user->isClient()) {
+            $this->items[] = $this->item('記録', route('records.sessions.today', $user), false);
             $this->items[] = $this->item('種目', route('records.exercises.index', $user), false);
         } elseif ($user->isActiveStaff()) {
             $this->items[] = $this->item('種目', route('staff.exercises.index'), $request->routeIs('staff.exercises.*'));

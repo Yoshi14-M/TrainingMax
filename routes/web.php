@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Account\GymLinkController;
 use App\Http\Controllers\Records\ExerciseController as RecordsExerciseController;
+use App\Http\Controllers\Records\SessionExerciseController;
+use App\Http\Controllers\Records\WorkoutSessionController;
+use App\Http\Controllers\Records\WorkoutSetController;
 use App\Http\Controllers\Staff\ClientController;
 use App\Http\Controllers\Staff\ExerciseController as StaffExerciseController;
 use App\Http\Controllers\Staff\InitialPasswordMailController;
@@ -27,6 +30,16 @@ Route::middleware(['auth', 'auth.session', 'verified'])->group(function () {
 
     // 利用者の記録（認可は基底の RecordsController が行う。名前は records.*）
     Route::prefix('clients/{client}')->name('records.')->group(function () {
+        // トレーニング記録（セッションのURLは、IDではなく実施日 YYYY-MM-DD）
+        Route::get('sessions/today', [WorkoutSessionController::class, 'today'])->name('sessions.today');
+        Route::post('sessions', [WorkoutSessionController::class, 'store'])->name('sessions.store');
+        Route::get('sessions/{workoutSession}', [WorkoutSessionController::class, 'show'])->name('sessions.show');
+        Route::delete('sessions/{workoutSession}', [WorkoutSessionController::class, 'destroy'])->name('sessions.destroy');
+        Route::delete('sessions/{workoutSession}/exercises/{sessionExercise}', [SessionExerciseController::class, 'destroy'])->name('session-exercises.destroy');
+        Route::post('sessions/{workoutSession}/sets', [WorkoutSetController::class, 'store'])->name('sets.store');
+        Route::put('sessions/{workoutSession}/sets/{workoutSet}', [WorkoutSetController::class, 'update'])->name('sets.update');
+        Route::delete('sessions/{workoutSession}/sets/{workoutSet}', [WorkoutSetController::class, 'destroy'])->name('sets.destroy');
+
         Route::get('exercises', [RecordsExerciseController::class, 'index'])->name('exercises.index');
         Route::post('exercises', [RecordsExerciseController::class, 'store'])->name('exercises.store');
         Route::put('exercises/{personalExercise}', [RecordsExerciseController::class, 'update'])->name('exercises.update');
