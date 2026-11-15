@@ -31,6 +31,20 @@ class AppServiceProvider extends ServiceProvider
         Route::bind('client', fn (string $value): User => User::query()->clients()->findOrFail($value));
         // {personalExercise} は {client} の個人種目だけを取得する（他人の個人種目は 404）。
         Route::bind('personalExercise', fn (string $value, \Illuminate\Routing\Route $route): Exercise => $route->parameter('client')->personalExercises()->findOrFail($value));
+        // {workoutSession} は {client} のセッションを実施日（YYYY-MM-DD）で取得する。
+        // 日付の形式が違う・実在しない日付・存在しないセッション・他の利用者のセッションは 404。
+        Route::bind('workoutSession', function (string $value, \Illuminate\Routing\Route $route) {
+            $isDate = preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $value, $m) === 1
+                && checkdate((int) $m[2], (int) $m[3], (int) $m[1]);
+
+            abort_unless($isDate, 404);
+
+            return $route->parameter('client')->workoutSessions()->where('performed_on', $value)->firstOrFail();
+        });
+        // {workoutSet} は {workoutSession} のセットだけを取得する（親子が違えば 404）。
+        Route::bind('workoutSet', fn (string $value, \Illuminate\Routing\Route $route) => $route->parameter('workoutSession')->workoutSets()->findOrFail($value));
+        // {sessionExercise} は {workoutSession} の種目だけを取得する（親子が違えば 404）。
+        Route::bind('sessionExercise', fn (string $value, \Illuminate\Routing\Route $route) => $route->parameter('workoutSession')->sessionExercises()->findOrFail($value));
         Route::bind('trainer', fn (string $value): User => User::query()->trainers()->findOrFail($value));
 
         // 招待コードの入力：1ユーザーにつき 5回／分 かつ 20回／時。成功・失敗・形式不正を問わず数える。
