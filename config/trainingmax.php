@@ -21,7 +21,13 @@ return [
         'register' => (int) env('RATE_LIMIT_REGISTER', 6),
         'password_reset' => (int) env('RATE_LIMIT_PASSWORD_RESET', 6),
         'initial_password_mail' => (int) env('RATE_LIMIT_INITIAL_PASSWORD_MAIL', 1),
+        // 招待コードの入力（1ユーザーにつき）
+        'invitation_code_per_minute' => (int) env('RATE_LIMIT_INVITATION_CODE_PER_MINUTE', 5),
+        'invitation_code_per_hour' => (int) env('RATE_LIMIT_INVITATION_CODE_PER_HOUR', 20),
     ],
+
+    // 招待コードの有効期限（日）
+    'invitation_code_expire_days' => (int) env('INVITATION_CODE_EXPIRE_DAYS', 7),
 
     // Strict-Transport-Security の max-age（秒。本番のみ送る）
     'hsts_max_age' => (int) env('HSTS_MAX_AGE', 31536000),
@@ -38,6 +44,8 @@ return [
         'owner_name' => env('SEED_OWNER_NAME', 'オーナー'),
         'owner_email' => env('SEED_OWNER_EMAIL'),
         'owner_password' => env('SEED_OWNER_PASSWORD'),
+        // 開発用のテストユーザー（DevelopmentSeeder）の共通パスワード。local 環境でのみ使う
+        'dev_user_password' => env('SEED_DEV_USER_PASSWORD'),
     ],
 
 ];

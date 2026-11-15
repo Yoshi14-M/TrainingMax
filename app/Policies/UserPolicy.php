@@ -69,4 +69,31 @@ class UserPolicy
     {
         return $this->suspend($user, $trainer);
     }
+
+    /**
+     * 招待コードでジムに紐付けられるか（ジム未所属の利用者本人。メール認証済みは verified ミドルウェアで確認）。
+     */
+    public function linkToGym(User $user): bool
+    {
+        return $user->isClient() && $user->gym_id === null;
+    }
+
+    /**
+     * 本人がジムとの紐付けを解除できるか（ジム所属の利用者）。
+     */
+    public function unlinkSelf(User $user): bool
+    {
+        return $user->isClient() && $user->gym_id !== null;
+    }
+
+    /**
+     * スタッフが利用者の紐付けを解除できるか（同じジムに所属している利用者に対する有効なスタッフ）。
+     */
+    public function unlink(User $user, User $client): bool
+    {
+        return $user->isActiveStaff()
+            && $client->isClient()
+            && $client->gym_id !== null
+            && $user->gym_id === $client->gym_id;
+    }
 }

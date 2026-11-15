@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * 種目（デフォルト／ジム共通／個人）。
@@ -62,6 +63,14 @@ class Exercise extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_user_id');
+    }
+
+    /**
+     * @return HasMany<SessionExercise, $this>
+     */
+    public function sessionExercises(): HasMany
+    {
+        return $this->hasMany(SessionExercise::class);
     }
 
     /**
