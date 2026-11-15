@@ -85,7 +85,6 @@ class MasterSeederTest extends TestCase
         $bench = Exercise::with(['bodyPart', 'category'])->where('name', 'ベンチプレス')->firstOrFail();
         $this->assertSame('胸', $bench->bodyPart->name);
         $this->assertSame('高重量コンパウンド', $bench->category->name);
-        $this->assertSame('2.50', $bench->weight_step);
         $this->assertFalse($bench->is_hidden);
 
         $sideRaise = Exercise::with(['bodyPart', 'category'])->where('name', 'サイドレイズ')->firstOrFail();

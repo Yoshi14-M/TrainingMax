@@ -24,4 +24,37 @@ class ExerciseCategory extends Model
     {
         return $this->hasMany(Exercise::class);
     }
+
+    /**
+     * 推奨レップ数の表示（例：6〜8回）。
+     */
+    public function repsLabel(): string
+    {
+        return $this->range($this->rep_min, $this->rep_max).'回';
+    }
+
+    /**
+     * 推奨RIRの表示（例：1〜2、0）。
+     */
+    public function rirLabel(): string
+    {
+        return 'RIR '.$this->range($this->rir_min, $this->rir_max);
+    }
+
+    /**
+     * 推奨休憩時間の表示（例：3分、90秒）。
+     */
+    public function restLabel(): string
+    {
+        if ($this->rest_seconds >= 60 && $this->rest_seconds % 60 === 0) {
+            return intdiv($this->rest_seconds, 60).'分';
+        }
+
+        return $this->rest_seconds.'秒';
+    }
+
+    private function range(int $min, int $max): string
+    {
+        return $min === $max ? (string) $min : "{$min}〜{$max}";
+    }
 }
