@@ -1,4 +1,4 @@
-@props(['title' => null, 'actions' => null])
+@props(['title' => null, 'actions' => null, 'timerRestSeconds' => null, 'timerReturnUrl' => null])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -46,5 +46,7 @@
 
         {{ $slot }}
     </main>
+    {{-- 休憩タイマー：どの画面でも、作動中（または終了後）は画面下部に表示する。記録画面では、種目を選ぶと推奨休憩時間がセットされる --}}
+    <x-workout-timer :rest-seconds="$timerRestSeconds" :return-url="$timerReturnUrl" />
 </body>
 </html>

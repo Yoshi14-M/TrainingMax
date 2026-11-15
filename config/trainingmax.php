@@ -29,6 +29,15 @@ return [
     // 招待コードの有効期限（日）
     'invitation_code_expire_days' => (int) env('INVITATION_CODE_EXPIRE_DAYS', 7),
 
+    // 休憩タイマー（秒）。入力できる範囲、「−／＋」の調整幅、推奨休憩時間がないときの既定値、終了時の点滅の長さ
+    'timer' => [
+        'min_seconds' => (int) env('TIMER_MIN_SECONDS', 10),
+        'max_seconds' => (int) env('TIMER_MAX_SECONDS', 600),
+        'adjust_seconds' => (int) env('TIMER_ADJUST_SECONDS', 15),
+        'default_seconds' => (int) env('TIMER_DEFAULT_SECONDS', 90),
+        'blink_seconds' => (int) env('TIMER_BLINK_SECONDS', 10),
+    ],
+
     // 重量の刻み（kg）として選べる値。記録画面（トレーニング記録のイシュー）で、ボタンの増減と推奨重量の切り下げに使う
     'weight_steps' => [0.5, 1, 1.25, 2.5, 5],
 
