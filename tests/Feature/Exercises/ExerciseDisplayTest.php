@@ -97,7 +97,10 @@ class ExerciseDisplayTest extends TestCase
 
         $html = $this->actingAs($client)->get(route('records.exercises.index', $client))->getContent();
 
-        $this->assertStringNotContainsString('fixed inset-x-0 bottom-0', $html);
+        // ナビ自体は画面下部に固定しない（下部に固定するのは休憩タイマーだけ）
+        preg_match('/<nav[^>]*aria-label="メインメニュー"[^>]*>/', $html, $nav);
+        $this->assertNotEmpty($nav);
+        $this->assertStringNotContainsString('fixed', $nav[0]);
         $this->assertLessThan(strpos($html, '<main'), strpos($html, 'aria-label="メインメニュー"'));
     }
 }
