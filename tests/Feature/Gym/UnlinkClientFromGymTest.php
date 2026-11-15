@@ -89,7 +89,6 @@ class UnlinkClientFromGymTest extends TestCase
         $gymExercise = $this->gymExercise('ケーブルクロス', [
             'body_part_id' => $part->id,
             'exercise_category_id' => $category->id,
-            'weight_step' => 1.25,
             'is_hidden' => true,
         ]);
         $sessionExercise = $this->record($this->client, $gymExercise, '2026-11-01');
@@ -101,7 +100,6 @@ class UnlinkClientFromGymTest extends TestCase
         $this->assertNull($copy->gym_id);
         $this->assertSame($part->id, $copy->body_part_id);
         $this->assertSame($category->id, $copy->exercise_category_id);
-        $this->assertSame('1.25', $copy->weight_step);
         $this->assertTrue($copy->is_hidden);
         $this->assertSame($copy->id, $sessionExercise->fresh()->exercise_id);
         $this->assertSame(2, $sessionExercise->sets()->count());
@@ -110,17 +108,18 @@ class UnlinkClientFromGymTest extends TestCase
     }
 
     #[Test]
-    public function 同名の個人種目があればコピーせずその個人種目にまとめられ分類と刻みは個人種目側のまま(): void
+    public function 同名の個人種目があればコピーせずその個人種目にまとめられ分類は個人種目側のまま(): void
     {
-        $gymExercise = $this->gymExercise('ベンチプレス', ['weight_step' => 2.5]);
-        $personal = $this->personalExercise('ベンチプレス', ['weight_step' => 1]);
+        $personalCategory = ExerciseCategory::factory()->create();
+        $gymExercise = $this->gymExercise('ベンチプレス');
+        $personal = $this->personalExercise('ベンチプレス', ['exercise_category_id' => $personalCategory->id]);
         $sessionExercise = $this->record($this->client, $gymExercise, '2026-11-01');
 
         $this->unlinkAsStaff();
 
         $this->assertSame(1, Exercise::where('owner_user_id', $this->client->id)->count());
         $this->assertSame($personal->id, $sessionExercise->fresh()->exercise_id);
-        $this->assertSame('1.00', $personal->fresh()->weight_step);
+        $this->assertSame($personalCategory->id, $personal->fresh()->exercise_category_id);
         $this->assertNull($this->client->fresh()->gym_id);
     }
 

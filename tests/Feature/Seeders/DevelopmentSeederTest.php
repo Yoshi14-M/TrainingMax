@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Seeders;
 
+use App\Enums\ExerciseScope;
 use App\Enums\UserRole;
+use App\Models\Exercise;
 use App\Models\InvitationCode;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
@@ -88,6 +90,20 @@ class DevelopmentSeederTest extends TestCase
     }
 
     #[Test]
+    public function ジム共通種目と個人種目が作成される(): void
+    {
+        $this->seedAll();
+
+        $gymExercise = Exercise::where('name', 'ケーブルクロス')->firstOrFail();
+        $this->assertSame(ExerciseScope::Gym, $gymExercise->scope);
+        $this->assertSame(User::where('email', 'owner@example.com')->value('gym_id'), $gymExercise->gym_id);
+
+        $personal = Exercise::where('name', '腹筋ローラー')->firstOrFail();
+        $this->assertSame(ExerciseScope::Personal, $personal->scope);
+        $this->assertSame(User::where('email', 'client1@example.com')->value('id'), $personal->owner_user_id);
+    }
+
+    #[Test]
     public function 何度実行しても重複しない(): void
     {
         $this->seedAll();
@@ -95,6 +111,8 @@ class DevelopmentSeederTest extends TestCase
 
         $this->assertSame(9, User::count());
         $this->assertSame(1, InvitationCode::count());
+        $this->assertSame(1, Exercise::where('name', 'ケーブルクロス')->count());
+        $this->assertSame(1, Exercise::where('name', '腹筋ローラー')->count());
     }
 
     #[Test]

@@ -3,7 +3,11 @@
 namespace Database\Seeders;
 
 use App\Actions\Gym\IssueInvitationCode;
+use App\Enums\ExerciseScope;
 use App\Enums\UserRole;
+use App\Models\BodyPart;
+use App\Models\Exercise;
+use App\Models\ExerciseCategory;
 use App\Models\Gym;
 use App\Models\InvitationCode;
 use App\Models\User;
@@ -34,7 +38,7 @@ class DevelopmentSeeder extends Seeder
         $this->user('trainer-suspended@example.com', '停止中トレーナー', UserRole::Trainer, $gym, $password, ['suspended_at' => now()]);
 
         // ジム所属の利用者
-        $this->user('client1@example.com', '山田太郎', UserRole::Client, $gym, $password);
+        $client1 = $this->user('client1@example.com', '山田太郎', UserRole::Client, $gym, $password);
         $this->user('client2@example.com', '鈴木花子', UserRole::Client, $gym, $password);
         $this->user('client-pending@example.com', 'パスワード未設定の利用者', UserRole::Client, $gym, null);
 
@@ -42,6 +46,7 @@ class DevelopmentSeeder extends Seeder
         $this->user('personal@example.com', '個人利用者', UserRole::Client, null, $password);
         $this->user('unverified@example.com', 'メール未認証の利用者', UserRole::Client, null, $password, ['email_verified_at' => null]);
 
+        $this->exercises($gym, $client1);
         $this->invitationCode($trainer);
     }
 
@@ -83,5 +88,33 @@ class DevelopmentSeeder extends Seeder
         $invitation = app(IssueInvitationCode::class)->handle($issuer, self::INVITATION_MEMO);
 
         $this->command?->info("開発用の招待コード: {$invitation->code}（有効期限 {$invitation->expires_at->isoFormat('YYYY/MM/DD')}）");
+    }
+
+    /**
+     * ジム共通種目と、利用者の個人種目（種目画面の確認用）。
+     */
+    private function exercises(Gym $gym, User $client): void
+    {
+        $this->exercise('ケーブルクロス', '胸', '標準アイソレート', ['scope' => ExerciseScope::Gym, 'gym_id' => $gym->id]);
+        $this->exercise('腹筋ローラー', '腹', '高レップアイソレート', ['scope' => ExerciseScope::Personal, 'owner_user_id' => $client->id]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes  scope・gym_id・owner_user_id
+     */
+    private function exercise(string $name, string $part, string $category, array $attributes): void
+    {
+        $exists = Exercise::query()->where('scope', $attributes['scope'])->where('name', $name)->exists();
+
+        if ($exists) {
+            return;
+        }
+
+        (new Exercise)->forceFill([
+            ...$attributes,
+            'body_part_id' => BodyPart::where('name', $part)->value('id'),
+            'exercise_category_id' => ExerciseCategory::where('name', $category)->value('id'),
+            'name' => $name,
+        ])->save();
     }
 }

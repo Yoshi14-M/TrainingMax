@@ -56,7 +56,6 @@ class DefaultExerciseSeeder extends Seeder
                         'body_part_id' => $bodyParts[$partName],
                         'exercise_category_id' => $categories[$categoryName],
                         'name' => $name,
-                        'weight_step' => 2.5,
                     ])->save();
                 }
             }
