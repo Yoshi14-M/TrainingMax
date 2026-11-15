@@ -13,7 +13,7 @@
     ];
 @endphp
 
-<x-layouts.app :title="$title">
+<x-layouts.app :title="$title" :timer-rest-seconds="$selected?->category->rest_seconds" :timer-return-url="$baseUrl">
     {{-- 日付の横：この日の記録（セッション）の削除 --}}
     <x-slot:actions>
         <x-confirm-modal :action="route('records.sessions.destroy', [$client, $session])"
@@ -144,5 +144,4 @@
                         :candidates="$candidates" :selected="$initial" :next-number="$nextNumber" :show-step="$nextNumber === 1" />
         @endif
     </section>
-
 </x-layouts.app>
