@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * 種目（デフォルト／ジム共通／個人）。
  * scope・gym_id・owner_user_id は一括代入できない。操作者のロールから処理の中で設定する（セキュリティ設計書4.3）。
  */
-#[Fillable(['body_part_id', 'exercise_category_id', 'name', 'weight_step', 'is_hidden'])]
+#[Fillable(['body_part_id', 'exercise_category_id', 'name', 'is_hidden'])]
 class Exercise extends Model
 {
     /** @use HasFactory<ExerciseFactory> */
@@ -28,7 +28,6 @@ class Exercise extends Model
     {
         return [
             'scope' => ExerciseScope::class,
-            'weight_step' => 'decimal:2',
             'is_hidden' => 'boolean',
         ];
     }

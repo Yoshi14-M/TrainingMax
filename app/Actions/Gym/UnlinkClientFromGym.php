@@ -16,7 +16,7 @@ class UnlinkClientFromGym
      * ジムとの紐付けを解除する（データ設計書5.3）。記録は利用者に残る。
      *
      * 記録に使ったジム共通種目は、本人の個人種目にして記録の参照先を付け替える（推移を途切れさせないため）。
-     * - 同じ名前の個人種目を本人が持っている場合：コピーせず、その個人種目にまとめる（分類・刻みは個人種目側）
+     * - 同じ名前の個人種目を本人が持っている場合：コピーせず、その個人種目にまとめる（分類は個人種目側）
      * - 持っていない場合：ジム共通種目を個人種目としてコピーする
      * 同じセッションにジム共通種目と同名の個人種目の両方の記録がある場合は、セットを個人種目側の末尾に移す。
      */
@@ -72,7 +72,6 @@ class UnlinkClientFromGym
             'body_part_id' => $gymExercise->body_part_id,
             'exercise_category_id' => $gymExercise->exercise_category_id,
             'name' => $gymExercise->name,
-            'weight_step' => $gymExercise->weight_step,
             'is_hidden' => $gymExercise->is_hidden,
         ]);
         $personal->forceFill([

@@ -29,6 +29,9 @@ return [
     // 招待コードの有効期限（日）
     'invitation_code_expire_days' => (int) env('INVITATION_CODE_EXPIRE_DAYS', 7),
 
+    // 重量の刻み（kg）として選べる値。記録画面（トレーニング記録のイシュー）で、ボタンの増減と推奨重量の切り下げに使う
+    'weight_steps' => [0.5, 1, 1.25, 2.5, 5],
+
     // Strict-Transport-Security の max-age（秒。本番のみ送る）
     'hsts_max_age' => (int) env('HSTS_MAX_AGE', 31536000),
 

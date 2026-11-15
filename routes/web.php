@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Account\GymLinkController;
+use App\Http\Controllers\Records\ExerciseController as RecordsExerciseController;
 use App\Http\Controllers\Staff\ClientController;
+use App\Http\Controllers\Staff\ExerciseController as StaffExerciseController;
 use App\Http\Controllers\Staff\InitialPasswordMailController;
 use App\Http\Controllers\Staff\InvitationCodeController;
 use App\Http\Controllers\Staff\MembershipController;
@@ -23,6 +25,14 @@ Route::middleware(['auth', 'auth.session', 'verified'])->group(function () {
     Route::post('gym-link', [GymLinkController::class, 'store'])->name('gym-link.store');
     Route::delete('gym-link', [GymLinkController::class, 'destroy'])->name('gym-link.destroy');
 
+    // 利用者の記録（認可は基底の RecordsController が行う。名前は records.*）
+    Route::prefix('clients/{client}')->name('records.')->group(function () {
+        Route::get('exercises', [RecordsExerciseController::class, 'index'])->name('exercises.index');
+        Route::post('exercises', [RecordsExerciseController::class, 'store'])->name('exercises.store');
+        Route::put('exercises/{personalExercise}', [RecordsExerciseController::class, 'update'])->name('exercises.update');
+        Route::delete('exercises/{personalExercise}', [RecordsExerciseController::class, 'destroy'])->name('exercises.destroy');
+    });
+
     // スタッフ専用（認可は基底の StaffController／OwnerController が行う）
     Route::prefix('staff')->name('staff.')->group(function () {
         Route::get('clients/create', [ClientController::class, 'create'])->name('clients.create');
@@ -37,6 +47,11 @@ Route::middleware(['auth', 'auth.session', 'verified'])->group(function () {
         Route::post('invitation-codes', [InvitationCodeController::class, 'store'])->name('invitation-codes.store');
         Route::delete('invitation-codes/{invitationCode}', [InvitationCodeController::class, 'destroy'])
             ->name('invitation-codes.destroy');
+
+        Route::get('exercises', [StaffExerciseController::class, 'index'])->name('exercises.index');
+        Route::post('exercises', [StaffExerciseController::class, 'store'])->name('exercises.store');
+        Route::put('exercises/{exercise}', [StaffExerciseController::class, 'update'])->name('exercises.update');
+        Route::delete('exercises/{exercise}', [StaffExerciseController::class, 'destroy'])->name('exercises.destroy');
 
         Route::get('trainers', [TrainerController::class, 'index'])->name('trainers.index');
         Route::post('trainers', [TrainerController::class, 'store'])->name('trainers.store');
