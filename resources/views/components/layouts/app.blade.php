@@ -16,6 +16,12 @@
                 @can('accessStaffArea', \App\Models\User::class)
                     <a class="text-blue-700 underline" href="{{ route('staff.clients.create') }}">利用者アカウント発行</a>
                 @endcan
+                @can('create', \App\Models\InvitationCode::class)
+                    <a class="text-blue-700 underline" href="{{ route('staff.invitation-codes.index') }}">招待コード</a>
+                @endcan
+                @if (auth()->user()->isClient())
+                    <a class="text-blue-700 underline" href="{{ route('gym-link.show') }}">ジム連携</a>
+                @endif
                 @can('manageTrainers', \App\Models\User::class)
                     <a class="text-blue-700 underline" href="{{ route('staff.trainers.index') }}">トレーナー管理</a>
                 @endcan
