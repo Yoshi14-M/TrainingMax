@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Exercise;
 use App\Models\User;
 use App\Support\Audit;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -28,6 +29,8 @@ class AppServiceProvider extends ServiceProvider
         // {client} は利用者（role = client）だけ、{trainer} はトレーナー（role = trainer）だけを取得する。
         // スタッフのIDなどを指定した場合は 404 になる（アーキテクチャ設計書4.3）。
         Route::bind('client', fn (string $value): User => User::query()->clients()->findOrFail($value));
+        // {personalExercise} は {client} の個人種目だけを取得する（他人の個人種目は 404）。
+        Route::bind('personalExercise', fn (string $value, \Illuminate\Routing\Route $route): Exercise => $route->parameter('client')->personalExercises()->findOrFail($value));
         Route::bind('trainer', fn (string $value): User => User::query()->trainers()->findOrFail($value));
 
         // 招待コードの入力：1ユーザーにつき 5回／分 かつ 20回／時。成功・失敗・形式不正を問わず数える。

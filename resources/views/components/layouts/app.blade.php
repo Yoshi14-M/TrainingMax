@@ -8,30 +8,23 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
-    <header class="border-b bg-white">
-        <div class="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-2 px-4 py-3">
+    <header class="sticky top-0 z-20 bg-white shadow-sm">
+        <div class="mx-auto max-w-3xl px-4 pt-3">
             <a href="{{ route('home') }}" class="text-lg font-bold tracking-tight">{{ config('app.name') }}</a>
-
-            <nav class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                @can('accessStaffArea', \App\Models\User::class)
-                    <a class="text-blue-700 underline" href="{{ route('staff.clients.create') }}">利用者アカウント発行</a>
-                @endcan
-                @can('create', \App\Models\InvitationCode::class)
-                    <a class="text-blue-700 underline" href="{{ route('staff.invitation-codes.index') }}">招待コード</a>
-                @endcan
-                @if (auth()->user()->isClient())
-                    <a class="text-blue-700 underline" href="{{ route('gym-link.show') }}">ジム連携</a>
-                @endif
-                @can('manageTrainers', \App\Models\User::class)
-                    <a class="text-blue-700 underline" href="{{ route('staff.trainers.index') }}">トレーナー管理</a>
-                @endcan
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="text-blue-700 underline">ログアウト</button>
-                </form>
-            </nav>
         </div>
+        <x-main-nav />
     </header>
+
+    @php($band = request()->route('client'))
+    @if ($band instanceof \App\Models\User && ! auth()->user()->is($band))
+        {{-- スタッフが利用者の記録を表示している間の帯 --}}
+        <div class="border-b bg-yellow-50 text-sm">
+            <div class="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-2 px-4 py-2">
+                <span>▶ {{ $band->name }}さんの記録を表示中</span>
+                <a class="text-blue-700 underline" href="{{ route('home') }}">戻る</a>
+            </div>
+        </div>
+    @endif
 
     <main class="mx-auto max-w-3xl px-4 py-6">
         @if (session('status'))

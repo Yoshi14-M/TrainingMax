@@ -29,7 +29,6 @@ class ExerciseFactory extends Factory
             'body_part_id' => BodyPart::factory(),
             'exercise_category_id' => ExerciseCategory::factory(),
             'name' => fake()->unique()->lexify('種目??????'),
-            'weight_step' => 2.5,
             'is_hidden' => false,
         ];
     }
