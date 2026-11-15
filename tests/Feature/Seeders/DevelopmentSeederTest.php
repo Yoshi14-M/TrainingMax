@@ -7,6 +7,8 @@ use App\Enums\UserRole;
 use App\Models\Exercise;
 use App\Models\InvitationCode;
 use App\Models\User;
+use App\Models\WorkoutSession;
+use App\Models\WorkoutSet;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\DevelopmentSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -104,6 +106,24 @@ class DevelopmentSeederTest extends TestCase
     }
 
     #[Test]
+    public function 山田太郎のトレーニング記録のサンプルが作成される(): void
+    {
+        $this->seedAll();
+
+        $client = User::where('email', 'client1@example.com')->firstOrFail();
+        $trainer = User::where('email', 'trainer1@example.com')->firstOrFail();
+
+        $this->assertSame(3, WorkoutSession::where('user_id', $client->id)->count());
+        $this->assertSame(11, WorkoutSet::count());
+        // トレーナーが入力した記録と、本人が入力した記録がある
+        $this->assertTrue(WorkoutSet::where('created_by', $trainer->id)->exists());
+        $this->assertTrue(WorkoutSet::where('created_by', $client->id)->exists());
+        // 推定1RMとボリュームは保存時に計算されている
+        $this->assertSame(0, WorkoutSet::where('estimated_1rm', '<=', 0)->count());
+        $this->assertSame(0, WorkoutSet::where('set_volume', '<=', 0)->count());
+    }
+
+    #[Test]
     public function 何度実行しても重複しない(): void
     {
         $this->seedAll();
@@ -113,6 +133,8 @@ class DevelopmentSeederTest extends TestCase
         $this->assertSame(1, InvitationCode::count());
         $this->assertSame(1, Exercise::where('name', 'ケーブルクロス')->count());
         $this->assertSame(1, Exercise::where('name', '腹筋ローラー')->count());
+        $this->assertSame(3, WorkoutSession::count());
+        $this->assertSame(11, WorkoutSet::count());
     }
 
     #[Test]

@@ -10,7 +10,10 @@ use App\Models\Exercise;
 use App\Models\ExerciseCategory;
 use App\Models\Gym;
 use App\Models\InvitationCode;
+use App\Models\SessionExercise;
 use App\Models\User;
+use App\Models\WorkoutSession;
+use App\Models\WorkoutSet;
 use Illuminate\Database\Seeder;
 use RuntimeException;
 
@@ -47,6 +50,7 @@ class DevelopmentSeeder extends Seeder
         $this->user('unverified@example.com', 'メール未認証の利用者', UserRole::Client, null, $password, ['email_verified_at' => null]);
 
         $this->exercises($gym, $client1);
+        $this->workouts($client1, $trainer);
         $this->invitationCode($trainer);
     }
 
@@ -116,5 +120,60 @@ class DevelopmentSeeder extends Seeder
             'exercise_category_id' => ExerciseCategory::where('name', $category)->value('id'),
             'name' => $name,
         ])->save();
+    }
+
+    /**
+     * トレーニング記録のサンプル（記録画面・推奨重量の確認用）。利用者に記録が1件もない場合だけ作る。
+     * 過去の複数日にベンチプレスなどを記録し、一部はトレーナーが入力したことにする。
+     */
+    private function workouts(User $client, User $trainer): void
+    {
+        if (WorkoutSession::query()->where('user_id', $client->id)->exists()) {
+            return;
+        }
+
+        // [何日前, 入力者, [種目名 => [[重量, レップ, 目標RIR, 実績RIR], ...]]]
+        $days = [
+            [14, $client, ['ベンチプレス' => [[60, 8, 2, 2], [60, 7, 1, 1], [57.5, 8, 1, 1]], 'ケーブルクロス' => [[20, 12, 1, 1]]]],
+            [7, $trainer, ['ベンチプレス' => [[62.5, 8, 2, 2], [62.5, 8, 1, 1], [60, 8, 1, 0]]]],
+            [3, $client, ['ベンチプレス' => [[65, 6, 2, 2], [65, 6, 1, 1]], 'スクワット' => [[80, 8, 2, 2], [80, 8, 1, 1]]]],
+        ];
+
+        foreach ($days as [$daysAgo, $author, $exercises]) {
+            $session = new WorkoutSession;
+            $session->forceFill([
+                'user_id' => $client->id,
+                'performed_on' => now()->subDays($daysAgo)->toDateString(),
+                'created_by' => $author->id,
+            ])->save();
+
+            $order = 0;
+
+            foreach ($exercises as $name => $sets) {
+                $exercise = Exercise::query()->where('name', $name)->first();
+
+                if ($exercise === null) {
+                    continue;
+                }
+
+                $sessionExercise = new SessionExercise;
+                $sessionExercise->forceFill([
+                    'workout_session_id' => $session->id,
+                    'exercise_id' => $exercise->id,
+                    'sort_order' => ++$order,
+                ])->save();
+
+                foreach ($sets as $index => [$weight, $reps, $targetRir, $actualRir]) {
+                    $set = new WorkoutSet;
+                    $set->fill(['weight' => $weight, 'reps' => $reps, 'target_rir' => $targetRir, 'actual_rir' => $actualRir]);
+                    $set->forceFill([
+                        'session_exercise_id' => $sessionExercise->id,
+                        'set_number' => $index + 1,
+                        'created_by' => $author->id,
+                        'updated_by' => $author->id,
+                    ])->save();
+                }
+            }
+        }
     }
 }
