@@ -7,3 +7,8 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Alpine.js が初期化されるまで、x-show で隠す要素（メニュー・モーダル・タイマー）を表示しない */
+[x-cloak] {
+    display: none !important;
+}
