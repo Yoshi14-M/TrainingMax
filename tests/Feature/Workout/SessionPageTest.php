@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Workout;
 
+use App\Models\BodyComposition;
 use App\Models\BodyPart;
 use App\Models\Exercise;
 use App\Models\ExerciseCategory;
@@ -473,5 +474,107 @@ class SessionPageTest extends TestCase
         $this->assertLessThan(strpos($html, 'この日の記録を削除'), strpos($html, '2026/11/01（日）</h1>'));
         // ページの下部には削除の操作を置かない
         $this->assertSame(1, substr_count($html, 'この日の記録を削除'));
+    }
+
+    private function recordBodyWeight(string $date, ?float $weight, ?User $user = null): void
+    {
+        $user ??= $this->client;
+        $record = new BodyComposition;
+        $record->fill(['measured_on' => $date, 'weight_kg' => $weight, 'waist_cm' => $weight === null ? 80 : null]);
+        $record->forceFill(['user_id' => $user->id, 'created_by' => $user->id, 'updated_by' => $user->id])->save();
+    }
+
+    #[Test]
+    public function 体重の記録がなければ自重ボタンは押せず体組成での登録を案内する(): void
+    {
+        $this->actingAs($this->client);
+
+        $response = $this->page(['exercise' => $this->exercise->id]);
+
+        $response->assertSee('体組成で体重を登録してください');
+        $this->assertNull($this->formConfigs($response->getContent())[0]['bodyWeight']);
+        $this->assertMatchesRegularExpression('/<button type="button" disabled title="体組成で体重を登録してください"[^>]*>自重<\/button>/', $response->getContent());
+    }
+
+    #[Test]
+    public function 体重の記録があれば自重ボタンが使え直近の体重が渡される(): void
+    {
+        $this->recordBodyWeight('2026-10-20', 70.5);
+        $this->recordBodyWeight('2026-10-25', 70.0);
+        $this->actingAs($this->client);
+
+        $response = $this->page(['exercise' => $this->exercise->id]);
+        $html = $response->getContent();
+
+        // セッション日（2026-11-01）以前で最新の体重
+        $this->assertEquals(70.0, $this->formConfigs($html)[0]['bodyWeight']);
+        $this->assertStringContainsString('@click="toggleBodyWeight()"', $html);
+        $this->assertStringContainsString('体重（70.0kg・2026/10/25の記録）が入ります', $html);
+        $this->assertDoesNotMatchRegularExpression('/disabled title="体組成で体重を登録してください"/', $html);
+    }
+
+    #[Test]
+    public function セッション日より後の体重や体重のない記録は自重に使われない(): void
+    {
+        $this->recordBodyWeight('2026-11-05', 65.0);
+        $this->recordBodyWeight('2026-10-28', null);
+        $this->actingAs($this->client);
+
+        $this->assertNull($this->formConfigs($this->page(['exercise' => $this->exercise->id])->getContent())[0]['bodyWeight']);
+
+        $this->recordBodyWeight('2026-10-01', 71.0);
+
+        $this->assertEquals(71.0, $this->formConfigs($this->page(['exercise' => $this->exercise->id])->getContent())[0]['bodyWeight']);
+    }
+
+    #[Test]
+    public function 他の利用者の体重は自重に使われない(): void
+    {
+        $other = User::factory()->client($this->gym)->create();
+        $this->recordBodyWeight('2026-10-20', 99.0, $other);
+        $this->actingAs($this->client);
+
+        $this->assertNull($this->formConfigs($this->page(['exercise' => $this->exercise->id])->getContent())[0]['bodyWeight']);
+    }
+
+    #[Test]
+    public function スタッフが入力する画面でも利用者の体重が自重に使われる(): void
+    {
+        $this->recordBodyWeight('2026-10-20', 70.5);
+
+        $html = $this->actingAs($this->trainer)
+            ->get(route('records.sessions.show', [$this->client, $this->session]).'?exercise='.$this->exercise->id)
+            ->getContent();
+
+        $this->assertSame(70.5, $this->formConfigs($html)[0]['bodyWeight']);
+    }
+
+    #[Test]
+    public function セットの編集フォームでも自重ボタンが使える(): void
+    {
+        $this->recordBodyWeight('2026-10-20', 70.5);
+        $this->addSets($this->session, $this->exercise, [[80, 8, 2, 2]]);
+        $set = WorkoutSet::sole();
+        $this->actingAs($this->client);
+
+        $configs = $this->formConfigs($this->page(['exercise' => $this->exercise->id, 'edit' => $set->id])->getContent());
+
+        $this->assertSame(70.5, $configs[0]['bodyWeight']);
+        $this->assertSame(70.5, $configs[1]['bodyWeight']);
+    }
+
+    #[Test]
+    public function 自重ボタンの状態は保存されず重量の値だけが保存される(): void
+    {
+        $this->recordBodyWeight('2026-10-20', 70.5);
+
+        $this->actingAs($this->client)->post(route('records.sets.store', [$this->client, $this->session]), [
+            'exercise_id' => $this->exercise->id, 'weight' => '80', 'reps' => '6', 'target_rir' => '2', 'actual_rir' => '2',
+            'body_weight' => '1', 'bodyWeightOn' => '1',
+        ])->assertSessionHasNoErrors();
+
+        $set = WorkoutSet::sole();
+        $this->assertSame('80.00', $set->weight);
+        $this->assertArrayNotHasKey('body_weight', $set->getAttributes());
     }
 }

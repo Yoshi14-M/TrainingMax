@@ -8,6 +8,7 @@ use App\Http\Requests\Records\StoreWorkoutSessionRequest;
 use App\Models\Exercise;
 use App\Models\User;
 use App\Models\WorkoutSession;
+use App\Queries\LatestBodyWeightQuery;
 use App\Queries\RecommendationQuery;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -39,7 +40,7 @@ class WorkoutSessionController extends RecordsController
         return redirect()->route('records.sessions.show', [$client, $session]);
     }
 
-    public function show(Request $request, User $client, WorkoutSession $workoutSession, RecommendationQuery $recommendations): View
+    public function show(Request $request, User $client, WorkoutSession $workoutSession, RecommendationQuery $recommendations, LatestBodyWeightQuery $bodyWeights): View
     {
         $workoutSession->load([
             'sessionExercises' => fn ($query) => $query->orderBy('sort_order'),
@@ -85,6 +86,7 @@ class WorkoutSessionController extends RecordsController
             'selectedSessionExercise' => $selectedSessionExercise,
             'candidates' => $candidates,
             'editingSet' => $editingSet,
+            'bodyWeight' => $bodyWeights->handle($client, $workoutSession->performed_on),
         ]);
     }
 
