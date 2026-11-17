@@ -4,6 +4,7 @@ namespace Tests\Feature\Seeders;
 
 use App\Enums\ExerciseScope;
 use App\Enums\UserRole;
+use App\Models\BodyComposition;
 use App\Models\Exercise;
 use App\Models\InvitationCode;
 use App\Models\User;
@@ -124,6 +125,21 @@ class DevelopmentSeederTest extends TestCase
     }
 
     #[Test]
+    public function 山田太郎の体組成のサンプルが作成される(): void
+    {
+        $this->seedAll();
+
+        $client = User::where('email', 'client1@example.com')->firstOrFail();
+        $trainer = User::where('email', 'trainer1@example.com')->firstOrFail();
+
+        $this->assertSame(4, BodyComposition::where('user_id', $client->id)->count());
+        $this->assertTrue(BodyComposition::where('created_by', $trainer->id)->exists());
+        $this->assertSame(0, BodyComposition::whereNull('weight_kg')->count());
+        // 周囲径まで入力した記録がある
+        $this->assertTrue(BodyComposition::whereNotNull('waist_cm')->exists());
+    }
+
+    #[Test]
     public function 何度実行しても重複しない(): void
     {
         $this->seedAll();
@@ -135,6 +151,7 @@ class DevelopmentSeederTest extends TestCase
         $this->assertSame(1, Exercise::where('name', '腹筋ローラー')->count());
         $this->assertSame(3, WorkoutSession::count());
         $this->assertSame(11, WorkoutSet::count());
+        $this->assertSame(4, BodyComposition::count());
     }
 
     #[Test]

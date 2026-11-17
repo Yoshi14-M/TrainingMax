@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Account\GymLinkController;
+use App\Http\Controllers\Records\BodyCompositionController;
 use App\Http\Controllers\Records\ExerciseController as RecordsExerciseController;
 use App\Http\Controllers\Records\SessionExerciseController;
 use App\Http\Controllers\Records\WorkoutSessionController;
@@ -39,6 +40,11 @@ Route::middleware(['auth', 'auth.session', 'verified'])->group(function () {
         Route::post('sessions/{workoutSession}/sets', [WorkoutSetController::class, 'store'])->name('sets.store');
         Route::put('sessions/{workoutSession}/sets/{workoutSet}', [WorkoutSetController::class, 'update'])->name('sets.update');
         Route::delete('sessions/{workoutSession}/sets/{workoutSet}', [WorkoutSetController::class, 'destroy'])->name('sets.destroy');
+
+        // 体組成の記録・履歴（1日1件。同じ日付で保存すると更新）
+        Route::get('body', [BodyCompositionController::class, 'index'])->name('body.index');
+        Route::post('body', [BodyCompositionController::class, 'store'])->name('body.store');
+        Route::delete('body/{bodyComposition}', [BodyCompositionController::class, 'destroy'])->name('body.destroy');
 
         Route::get('exercises', [RecordsExerciseController::class, 'index'])->name('exercises.index');
         Route::post('exercises', [RecordsExerciseController::class, 'store'])->name('exercises.store');

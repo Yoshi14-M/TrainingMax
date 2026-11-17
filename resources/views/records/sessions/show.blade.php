@@ -90,7 +90,7 @@
                                 <tr>
                                     <td colspan="7" class="px-2 pb-3">
                                         <x-set-form :action="route('records.sets.update', [$client, $session, $set])" method="PUT"
-                                                    :category="$sessionExercise->exercise->category" :set="$set" :show-step="false" submit="更新" />
+                                                    :category="$sessionExercise->exercise->category" :set="$set" :show-step="false" :body-weight="$bodyWeight" submit="更新" />
                                     </td>
                                 </tr>
                             @endif
@@ -141,7 +141,7 @@
             @php($nextNumber = ($selectedSessionExercise?->sets->count() ?? 0) + 1)
             @php($initial = collect($candidates)->firstWhere('key', 'previous')['key'] ?? (count($candidates) === 1 ? $candidates[0]['key'] : null))
             <x-set-form :action="route('records.sets.store', [$client, $session])" :exercise="$selected" :category="$selected->category"
-                        :candidates="$candidates" :selected="$initial" :next-number="$nextNumber" :show-step="$nextNumber === 1" />
+                        :candidates="$candidates" :selected="$initial" :next-number="$nextNumber" :show-step="$nextNumber === 1" :body-weight="$bodyWeight" />
         @endif
     </section>
 </x-layouts.app>
