@@ -35,6 +35,8 @@ export function formatWeight(value) {
     return rounded.toFixed(decimals);
 }
 
+import { toggleBodyWeight } from './weight-core';
+
 export default (config) => ({
     candidates: config.candidates,
     selected: config.selected,
@@ -46,6 +48,9 @@ export default (config) => ({
     targetRir: config.targetRir,
     actualRir: config.actualRir,
     actualTouched: config.actualTouched,
+    bodyWeight: config.bodyWeight,
+    bodyWeightOn: false,
+    weightBeforeBodyWeight: '',
 
     init() {
         if (this.selected !== null && (this.weight === '' || this.weight === null)) {
@@ -79,7 +84,18 @@ export default (config) => ({
         return value === null ? candidate.label : `${candidate.label} ${formatWeight(value)}kg`;
     },
 
+    /** 自重ボタン：直近の体重を重量欄に入れる（もう一度押すと元の値に戻る）。加重分は「＋」や直接入力で足す */
+    toggleBodyWeight() {
+        const next = toggleBodyWeight({ weight: this.weight, before: this.weightBeforeBodyWeight, on: this.bodyWeightOn }, this.bodyWeight);
+
+        this.weight = next.weight;
+        this.weightBeforeBodyWeight = next.before;
+        this.bodyWeightOn = next.on;
+        this.selected = null;
+    },
+
     choose(candidate) {
+        this.bodyWeightOn = false;
         this.selected = candidate.key;
         this.applyRecommendation();
     },
