@@ -114,8 +114,8 @@ class DevelopmentSeederTest extends TestCase
         $client = User::where('email', 'client1@example.com')->firstOrFail();
         $trainer = User::where('email', 'trainer1@example.com')->firstOrFail();
 
-        $this->assertSame(3, WorkoutSession::where('user_id', $client->id)->count());
-        $this->assertSame(11, WorkoutSet::count());
+        $this->assertSame(9, WorkoutSession::where('user_id', $client->id)->count());
+        $this->assertSame(32, WorkoutSet::count());
         // トレーナーが入力した記録と、本人が入力した記録がある
         $this->assertTrue(WorkoutSet::where('created_by', $trainer->id)->exists());
         $this->assertTrue(WorkoutSet::where('created_by', $client->id)->exists());
@@ -149,8 +149,8 @@ class DevelopmentSeederTest extends TestCase
         $this->assertSame(1, InvitationCode::count());
         $this->assertSame(1, Exercise::where('name', 'ケーブルクロス')->count());
         $this->assertSame(1, Exercise::where('name', '腹筋ローラー')->count());
-        $this->assertSame(3, WorkoutSession::count());
-        $this->assertSame(11, WorkoutSet::count());
+        $this->assertSame(9, WorkoutSession::count());
+        $this->assertSame(32, WorkoutSet::count());
         $this->assertSame(4, BodyComposition::count());
     }
 
