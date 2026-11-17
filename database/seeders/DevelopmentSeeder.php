@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Actions\Gym\IssueInvitationCode;
 use App\Enums\ExerciseScope;
 use App\Enums\UserRole;
+use App\Models\BodyComposition;
 use App\Models\BodyPart;
 use App\Models\Exercise;
 use App\Models\ExerciseCategory;
@@ -51,6 +52,7 @@ class DevelopmentSeeder extends Seeder
 
         $this->exercises($gym, $client1);
         $this->workouts($client1, $trainer);
+        $this->bodyCompositions($client1, $trainer);
         $this->invitationCode($trainer);
     }
 
@@ -174,6 +176,31 @@ class DevelopmentSeeder extends Seeder
                     ])->save();
                 }
             }
+        }
+    }
+
+    /**
+     * 体組成のサンプル（体組成の画面・「自重」ボタンの確認用）。利用者に記録が1件もない場合だけ作る。
+     * 一部はトレーナーが入力したことにする。
+     */
+    private function bodyCompositions(User $client, User $trainer): void
+    {
+        if (BodyComposition::query()->where('user_id', $client->id)->exists()) {
+            return;
+        }
+
+        // [何日前, 入力者, 値]
+        $records = [
+            [20, $client, ['weight_kg' => 71.2, 'body_fat_percent' => 19.0]],
+            [14, $trainer, ['weight_kg' => 70.8, 'body_fat_percent' => 18.6, 'muscle_mass_kg' => 54.9, 'waist_cm' => 82.0, 'chest_cm' => 96.5, 'upper_arm_cm' => 33.0]],
+            [7, $client, ['weight_kg' => 70.5]],
+            [2, $client, ['weight_kg' => 70.1, 'body_fat_percent' => 18.2, 'muscle_mass_kg' => 55.3]],
+        ];
+
+        foreach ($records as [$daysAgo, $author, $values]) {
+            $record = new BodyComposition;
+            $record->fill(['measured_on' => now()->subDays($daysAgo)->toDateString(), ...$values]);
+            $record->forceFill(['user_id' => $client->id, 'created_by' => $author->id, 'updated_by' => $author->id])->save();
         }
     }
 }

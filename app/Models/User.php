@@ -60,6 +60,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * @return HasMany<BodyComposition, $this>
+     */
+    public function bodyCompositions(): HasMany
+    {
+        return $this->hasMany(BodyComposition::class);
+    }
+
+    /**
      * 本人の個人種目。
      *
      * @return HasMany<Exercise, $this>
