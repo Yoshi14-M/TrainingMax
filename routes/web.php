@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\Account\GymLinkController;
 use App\Http\Controllers\Records\BodyCompositionController;
+use App\Http\Controllers\Records\BodyGraphController;
 use App\Http\Controllers\Records\ExerciseController as RecordsExerciseController;
 use App\Http\Controllers\Records\SessionExerciseController;
+use App\Http\Controllers\Records\TrainingGraphController;
 use App\Http\Controllers\Records\WorkoutSessionController;
 use App\Http\Controllers\Records\WorkoutSetController;
 use App\Http\Controllers\Staff\ClientController;
@@ -45,6 +47,10 @@ Route::middleware(['auth', 'auth.session', 'verified'])->group(function () {
         Route::get('body', [BodyCompositionController::class, 'index'])->name('body.index');
         Route::post('body', [BodyCompositionController::class, 'store'])->name('body.store');
         Route::delete('body/{bodyComposition}', [BodyCompositionController::class, 'destroy'])->name('body.destroy');
+
+        // グラフ（ひとつのグラフに各指標を重ね、数値は吹き出しで表示する）
+        Route::get('graphs/training', TrainingGraphController::class)->name('graphs.training');
+        Route::get('graphs/body', BodyGraphController::class)->name('graphs.body');
 
         Route::get('exercises', [RecordsExerciseController::class, 'index'])->name('exercises.index');
         Route::post('exercises', [RecordsExerciseController::class, 'store'])->name('exercises.store');
