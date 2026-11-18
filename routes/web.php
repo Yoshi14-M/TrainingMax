@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Account\GymLinkController;
+use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\HomeRedirectController;
 use App\Http\Controllers\Records\BodyCompositionController;
 use App\Http\Controllers\Records\BodyGraphController;
@@ -18,12 +19,19 @@ use App\Http\Controllers\Staff\MembershipController;
 use App\Http\Controllers\Staff\TrainerController;
 use App\Http\Controllers\Staff\TrainerSuspensionController;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Http\Controllers\PasswordController;
+use Laravel\Fortify\Http\Controllers\ProfileInformationController;
 
 require __DIR__.'/auth.php';
 
 Route::middleware(['auth', 'auth.session', 'verified'])->group(function () {
     // ログイン後のトップ：利用者は自分のホーム、スタッフは利用者一覧へ移す
     Route::get('/', HomeRedirectController::class)->name('home');
+
+    // プロフィール・アカウント設定（S-16。更新は Fortify のコントローラー。本人のデータのみ）
+    Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::put('user/profile-information', [ProfileInformationController::class, 'update'])->name('user-profile-information.update');
+    Route::put('user/password', [PasswordController::class, 'update'])->name('user-password.update');
 
     // ジム連携（個人利用者：招待コードで紐付け、ジム所属の利用者：解除）
     Route::get('gym-link', [GymLinkController::class, 'show'])->name('gym-link.show');

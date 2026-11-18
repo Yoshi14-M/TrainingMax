@@ -63,6 +63,8 @@ class MainNav extends Component
             }
         }
 
+        $this->menu[] = ['label' => 'プロフィール', 'href' => route('profile.show')];
+
         if ($user->isClient()) {
             $this->menu[] = ['label' => 'ジム連携', 'href' => route('gym-link.show')];
         }
