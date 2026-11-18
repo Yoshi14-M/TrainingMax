@@ -96,4 +96,15 @@ class UserPolicy
             && $client->gym_id !== null
             && $user->gym_id === $client->gym_id;
     }
+
+    /**
+     * 利用者の詳細（S-21）を見られるか（有効なスタッフが、同じジムの利用者に対して）。
+     */
+    public function viewClient(User $user, User $client): bool
+    {
+        return $user->isActiveStaff()
+            && $client->isClient()
+            && $client->gym_id !== null
+            && $user->gym_id === $client->gym_id;
+    }
 }

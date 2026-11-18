@@ -98,8 +98,11 @@ class EmailVerificationTest extends TestCase
     }
 
     #[Test]
-    public function 認証済みならホームを開ける(): void
+    public function 認証済みならトップから自分のホームへ移る(): void
     {
-        $this->actingAs(User::factory()->create())->get(route('home'))->assertOk();
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get(route('home'))->assertRedirect(route('records.home', $user));
+        $this->actingAs($user)->get(route('records.home', $user))->assertOk();
     }
 }

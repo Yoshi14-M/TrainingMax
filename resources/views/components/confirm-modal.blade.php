@@ -7,7 +7,7 @@
     <div x-show="open" x-cloak @keydown.escape.window="open = false"
          class="fixed inset-0 z-30 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
         <div @click.outside="open = false" class="w-full max-w-sm rounded-xl bg-white p-5 shadow-lg">
-            <p class="mb-4 text-sm">{{ $message }}</p>
+            <p class="mb-4 whitespace-pre-line text-sm">{{ $message }}</p>
 
             <form method="POST" action="{{ $action }}" class="flex justify-end gap-2">
                 @csrf
