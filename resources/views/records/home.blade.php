@@ -57,6 +57,9 @@
                             @if ($day['hasBody'])
                                 <span class="mt-1 inline-block h-2 w-2 rounded-full bg-emerald-500" title="体組成を記録"></span>
                             @endif
+                            @if ($day['hasComment'])
+                                <span class="mt-1 inline-block h-2 w-2 rounded-sm bg-orange-500" title="コメントあり"></span>
+                            @endif
 
                         @if ($day['session'] || $day['creatable'])
                             </a>
@@ -70,7 +73,7 @@
     </div>
 
     <p class="mt-2 text-xs text-gray-500">
-        <span class="inline-block h-2 w-2 rounded-full bg-emerald-500 align-middle"></span> は体組成を記録した日です。
+        <span class="inline-block h-2 w-2 rounded-full bg-emerald-500 align-middle"></span> は体組成を記録した日、<span class="inline-block h-2 w-2 rounded-sm bg-orange-500 align-middle"></span> はコメントがある日です。
     </p>
 
     {{-- 今日のトレーニング --}}

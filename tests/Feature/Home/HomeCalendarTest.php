@@ -126,7 +126,7 @@ class HomeCalendarTest extends TestCase
 
         // 今月の2日分だけ（凡例の●は別）
         $this->assertSame(2, substr_count($html, 'title="体組成を記録"'));
-        $this->assertStringContainsString('は体組成を記録した日です。', $html);
+        $this->assertStringContainsString('は体組成を記録した日、', $html);
     }
 
     #[Test]

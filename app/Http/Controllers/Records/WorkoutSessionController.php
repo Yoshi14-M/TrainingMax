@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Records;
 
 use App\Actions\Workout\CreateWorkoutSession;
 use App\Actions\Workout\DeleteWorkoutSession;
+use App\Enums\CoachingNoteCategory;
 use App\Http\Requests\Records\NewWorkoutSessionRequest;
 use App\Http\Requests\Records\StoreWorkoutSessionRequest;
+use App\Models\CoachingNote;
 use App\Models\Exercise;
+use App\Models\SessionComment;
 use App\Models\User;
 use App\Models\WorkoutSession;
 use App\Queries\LatestBodyWeightQuery;
@@ -92,8 +95,43 @@ class WorkoutSessionController extends RecordsController
             $editingSet = $workoutSession->workoutSets()->find($request->integer('edit'));
         }
 
+        $user = $request->user();
+
+        // 指導メモの要約はスタッフのときだけ読み込む（利用者本人には、読み込み自体をしない。セキュリティ設計書4.4）
+        $notes = $user->can('viewAny', [CoachingNote::class, $client])
+            ? $client->coachingNotes()
+                ->where('gym_id', $user->gym_id)
+                ->whereIn('category', collect(CoachingNoteCategory::cases())->filter->showsOnSession()->map->value->all())
+                ->with(['creator', 'updater'])
+                ->orderBy('category')->latest('updated_at')->latest('id')
+                ->get()
+            : null;
+
+        // コメント（スレッド）：最初のコメントを古い順に、それぞれの返信を古い順に表示する
+        $comments = $workoutSession->comments()
+            ->whereNull('parent_id')
+            ->with(['author', 'replies' => fn ($query) => $query->with('author')->orderBy('created_at')->orderBy('id')])
+            ->orderBy('created_at')->orderBy('id')
+            ->get();
+
+        // 認可の判定で、コメントごとにセッションと利用者を読み直さないよう、読み込み済みのものを渡す
+        $workoutSession->setRelation('user', $client);
+        $all = $comments->flatMap(fn (SessionComment $comment) => collect([$comment])->concat($comment->replies));
+        $all->each(fn (SessionComment $comment) => $comment->setRelation('workoutSession', $workoutSession));
+
+        // 編集できるのは書いた本人だけ（他の人のコメントの編集画面は出さない）
+        $editingComment = $request->filled('edit-comment') ? $all->firstWhere('id', $request->integer('edit-comment')) : null;
+        $editingComment = $editingComment !== null && $user->can('update', $editingComment) ? $editingComment : null;
+        // 返信中のコメント（返信の入力エラーで戻ったとき、その欄を開いて入力値を保つ）
+        $replyingTo = $request->filled('reply-to') ? $comments->firstWhere('id', $request->integer('reply-to')) : null;
+
         return view('records.sessions.show', [
             'client' => $client,
+            'notes' => $notes,
+            'comments' => $comments,
+            'editingComment' => $editingComment,
+            'replyingTo' => $replyingTo,
+            'canComment' => $user->can('create', [SessionComment::class, $workoutSession]),
             'session' => $workoutSession,
             'sessionExercises' => $workoutSession->sessionExercises,
             'previousDate' => $client->workoutSessions()->where('performed_on', '<', $date)->max('performed_on'),

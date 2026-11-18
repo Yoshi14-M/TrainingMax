@@ -57,6 +57,14 @@ class WorkoutSession extends Model
     }
 
     /**
+     * @return HasMany<SessionComment, $this>
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(SessionComment::class);
+    }
+
+    /**
      * セッションの全セット（session_exercises 経由）。
      *
      * @return HasManyThrough<WorkoutSet, SessionExercise, $this>

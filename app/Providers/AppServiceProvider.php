@@ -47,6 +47,10 @@ class AppServiceProvider extends ServiceProvider
         Route::bind('sessionExercise', fn (string $value, \Illuminate\Routing\Route $route) => $route->parameter('workoutSession')->sessionExercises()->findOrFail($value));
         // {bodyComposition} は {client} の体組成の記録だけを取得する（他の利用者の記録は 404）。
         Route::bind('bodyComposition', fn (string $value, \Illuminate\Routing\Route $route) => $route->parameter('client')->bodyCompositions()->findOrFail($value));
+        // {sessionComment} は {workoutSession} のコメントだけを取得する（親子が違えば 404）。
+        Route::bind('sessionComment', fn (string $value, \Illuminate\Routing\Route $route) => $route->parameter('workoutSession')->comments()->findOrFail($value));
+        // {coachingNote} は {client} の指導メモだけを取得する（他の利用者のメモは 404）。
+        Route::bind('coachingNote', fn (string $value, \Illuminate\Routing\Route $route) => $route->parameter('client')->coachingNotes()->findOrFail($value));
         Route::bind('trainer', fn (string $value): User => User::query()->trainers()->findOrFail($value));
 
         // 招待コードの入力：1ユーザーにつき 5回／分 かつ 20回／時。成功・失敗・形式不正を問わず数える。

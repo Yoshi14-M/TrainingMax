@@ -7,11 +7,13 @@ use App\Http\Controllers\Records\BodyCompositionController;
 use App\Http\Controllers\Records\BodyGraphController;
 use App\Http\Controllers\Records\ExerciseController as RecordsExerciseController;
 use App\Http\Controllers\Records\HomeController;
+use App\Http\Controllers\Records\SessionCommentController;
 use App\Http\Controllers\Records\SessionExerciseController;
 use App\Http\Controllers\Records\TrainingGraphController;
 use App\Http\Controllers\Records\WorkoutSessionController;
 use App\Http\Controllers\Records\WorkoutSetController;
 use App\Http\Controllers\Staff\ClientController;
+use App\Http\Controllers\Staff\CoachingNoteController;
 use App\Http\Controllers\Staff\ExerciseController as StaffExerciseController;
 use App\Http\Controllers\Staff\InitialPasswordMailController;
 use App\Http\Controllers\Staff\InvitationCodeController;
@@ -57,6 +59,12 @@ Route::middleware(['auth', 'auth.session', 'verified'])->group(function () {
         Route::put('sessions/{workoutSession}/sets/{workoutSet}', [WorkoutSetController::class, 'update'])->name('sets.update');
         Route::delete('sessions/{workoutSession}/sets/{workoutSet}', [WorkoutSetController::class, 'destroy'])->name('sets.destroy');
 
+        // セッションコメント（スタッフのコメント・利用者本人のメモ。どちらにも返信できる）
+        Route::post('sessions/{workoutSession}/comments', [SessionCommentController::class, 'store'])->name('comments.store');
+        Route::post('sessions/{workoutSession}/comments/{sessionComment}/replies', [SessionCommentController::class, 'reply'])->name('comments.reply');
+        Route::put('sessions/{workoutSession}/comments/{sessionComment}', [SessionCommentController::class, 'update'])->name('comments.update');
+        Route::delete('sessions/{workoutSession}/comments/{sessionComment}', [SessionCommentController::class, 'destroy'])->name('comments.destroy');
+
         // 体組成の記録・履歴（1日1件。同じ日付で保存すると更新）
         Route::get('body', [BodyCompositionController::class, 'index'])->name('body.index');
         Route::post('body', [BodyCompositionController::class, 'store'])->name('body.store');
@@ -80,6 +88,11 @@ Route::middleware(['auth', 'auth.session', 'verified'])->group(function () {
         Route::post('clients', [ClientController::class, 'store'])->name('clients.store');
         Route::post('clients/{client}/initial-password-mail', InitialPasswordMailController::class)
             ->name('clients.initial-password-mail');
+
+        // 指導メモ（スタッフ専用。利用者本人には見せない）
+        Route::post('clients/{client}/notes', [CoachingNoteController::class, 'store'])->name('clients.notes.store');
+        Route::put('clients/{client}/notes/{coachingNote}', [CoachingNoteController::class, 'update'])->name('clients.notes.update');
+        Route::delete('clients/{client}/notes/{coachingNote}', [CoachingNoteController::class, 'destroy'])->name('clients.notes.destroy');
 
         Route::delete('clients/{client}/membership', [MembershipController::class, 'destroy'])
             ->name('clients.membership.destroy');

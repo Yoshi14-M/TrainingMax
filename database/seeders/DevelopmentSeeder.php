@@ -3,14 +3,17 @@
 namespace Database\Seeders;
 
 use App\Actions\Gym\IssueInvitationCode;
+use App\Enums\CoachingNoteCategory;
 use App\Enums\ExerciseScope;
 use App\Enums\UserRole;
 use App\Models\BodyComposition;
 use App\Models\BodyPart;
+use App\Models\CoachingNote;
 use App\Models\Exercise;
 use App\Models\ExerciseCategory;
 use App\Models\Gym;
 use App\Models\InvitationCode;
+use App\Models\SessionComment;
 use App\Models\SessionExercise;
 use App\Models\User;
 use App\Models\WorkoutSession;
@@ -54,6 +57,7 @@ class DevelopmentSeeder extends Seeder
         $this->workouts($client1, $trainer);
         $this->bodyCompositions($client1, $trainer);
         $this->secondClientRecords($client2, $trainer);
+        $this->coaching($client1, $trainer);
         $this->invitationCode($trainer);
     }
 
@@ -149,6 +153,54 @@ class DevelopmentSeeder extends Seeder
         ];
 
         $this->recordWorkouts($client, $days);
+    }
+
+    /**
+     * 指導メモ（スタッフ専用）とセッションコメントのサンプル。山田太郎に指導メモが1件もない場合だけ作る。
+     */
+    private function coaching(User $client, User $trainer): void
+    {
+        if (CoachingNote::query()->where('client_user_id', $client->id)->exists()) {
+            return;
+        }
+
+        foreach ([
+            [CoachingNoteCategory::Caution, 'フォームが崩れやすいので、最後の2レップは必ず確認する。'],
+            [CoachingNoteCategory::Injury, "右肩に違和感の既往あり。ベンチプレスは可動域を無理に広げない。\n痛みが出たらすぐ中止する。"],
+            [CoachingNoteCategory::Goal, '3か月でベンチプレス70kg。'],
+        ] as [$category, $body]) {
+            $note = new CoachingNote(['category' => $category, 'body' => $body]);
+            $note->forceFill([
+                'gym_id' => $client->gym_id,
+                'client_user_id' => $client->id,
+                'created_by' => $trainer->id,
+                'updated_by' => $trainer->id,
+            ])->save();
+        }
+
+        $sessions = WorkoutSession::query()->where('user_id', $client->id)->orderByDesc('performed_on')->take(2)->get();
+
+        // トレーナーのコメントと、利用者本人の返信・トレーニングメモ
+        if ($sessions->isNotEmpty()) {
+            $comment = $this->comment($sessions[0], $trainer, "今日のベンチプレスはフォームが安定していました。\n次回は65kgで3セットを目指しましょう。");
+            $this->comment($sessions[0], $client, 'ありがとうございます！次回は肩の様子を見ながら挑戦します。', $comment);
+        }
+
+        if ($sessions->count() > 1) {
+            $this->comment($sessions[1], $client, '右肩が少し重い。ウォームアップを長めに。');
+        }
+    }
+
+    private function comment(WorkoutSession $session, User $author, string $body, ?SessionComment $parent = null): SessionComment
+    {
+        $comment = new SessionComment(['body' => $body]);
+        $comment->forceFill([
+            'workout_session_id' => $session->id,
+            'parent_id' => $parent?->id,
+            'created_by' => $author->id,
+        ])->save();
+
+        return $comment;
     }
 
     /**
