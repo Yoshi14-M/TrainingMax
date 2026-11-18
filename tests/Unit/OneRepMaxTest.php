@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Support\Format;
 use App\Support\Training\OneRepMax;
+use Illuminate\Support\Carbon;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -119,5 +120,20 @@ class OneRepMaxTest extends TestCase
         $this->assertSame('80.1', Format::oneDecimal(80.05));
         $this->assertSame('106.7', Format::oneDecimal(106.666));
         $this->assertSame('480.0', Format::oneDecimal('480.00'));
+    }
+
+    #[Test]
+    public function 最終トレーニング日は経過日数を併記して表示される(): void
+    {
+        Carbon::setTestNow('2026-11-13 10:00:00');
+
+        $this->assertSame('記録なし', Format::lastTrained(null));
+        $this->assertSame('11/13（今日）', Format::lastTrained('2026-11-13'));
+        $this->assertSame('11/12（1日前）', Format::lastTrained('2026-11-12'));
+        $this->assertSame('11/10（3日前）', Format::lastTrained('2026-11-10'));
+        $this->assertSame('10/1（43日前）', Format::lastTrained('2026-10-01'));
+        $this->assertSame('1/5（312日前）', Format::lastTrained('2026-01-05'));
+
+        Carbon::setTestNow();
     }
 }

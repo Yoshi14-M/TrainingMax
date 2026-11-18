@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Carbon\CarbonImmutable;
+
 /**
  * 画面表示用の数値の整形（機能設計書5.4）。
  */
@@ -28,5 +30,20 @@ class Format
     public static function oneDecimal(float|string|null $value): string
     {
         return $value === null ? '' : number_format(round((float) $value, 1), 1, '.', '');
+    }
+
+    /**
+     * 最終トレーニング日：経過日数を併記する（例：11/10（3日前））。記録がなければ「記録なし」。
+     */
+    public static function lastTrained(?string $date): string
+    {
+        if ($date === null) {
+            return '記録なし';
+        }
+
+        $day = CarbonImmutable::parse($date)->startOfDay();
+        $days = (int) $day->diffInDays(CarbonImmutable::today(), true);
+
+        return $day->format('n/j').'（'.($days === 0 ? '今日' : "{$days}日前").'）';
     }
 }

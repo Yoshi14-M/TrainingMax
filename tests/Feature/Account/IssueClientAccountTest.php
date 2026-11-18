@@ -42,12 +42,12 @@ class IssueClientAccountTest extends TestCase
         Notification::fake();
         $trainer = User::factory()->trainer($this->gym)->create();
 
-        $this->actingAs($trainer)
-            ->post(route('staff.clients.store'), ['name' => '山田太郎', 'email' => 'Yamada@Example.com'])
-            ->assertRedirect(route('staff.clients.create'))
-            ->assertSessionHas('status');
+        $response = $this->actingAs($trainer)
+            ->post(route('staff.clients.store'), ['name' => '山田太郎', 'email' => 'Yamada@Example.com']);
 
         $client = User::where('email', 'yamada@example.com')->firstOrFail();
+        // 発行後は、その利用者の詳細（S-21）へ移る
+        $response->assertRedirect(route('staff.clients.show', $client))->assertSessionHas('status');
         $this->assertSame(UserRole::Client, $client->role);
         $this->assertSame($this->gym->id, $client->gym_id);
         $this->assertNull($client->password);

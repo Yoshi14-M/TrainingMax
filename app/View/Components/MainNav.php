@@ -31,16 +31,24 @@ class MainNav extends Component
         if ($routeClient instanceof User) {
             // 利用者の記録を表示中（利用者本人、または表示対象を選んだスタッフ）
             $this->target = $user->is($routeClient) ? null : $routeClient;
+            $this->items[] = $this->item('ホーム', route('records.home', $routeClient), $request->routeIs('records.home'));
             $this->items[] = $this->item('記録', route('records.sessions.today', $routeClient), $request->routeIs('records.sessions.*', 'records.sets.*'));
             $this->items[] = $this->item('体組成', route('records.body.index', $routeClient), $request->routeIs('records.body.*'));
             $this->items[] = $this->item('グラフ', route('records.graphs.training', $routeClient), $request->routeIs('records.graphs.*'));
             $this->items[] = $this->item('種目', route('records.exercises.index', $routeClient), $request->routeIs('records.exercises.*'));
+
+            if ($this->target !== null) {
+                // 表示対象を選んでいるスタッフ：利用者一覧へ戻る
+                $this->items[] = $this->item('利用者', route('staff.clients.index'), false);
+            }
         } elseif ($user->isClient()) {
+            $this->items[] = $this->item('ホーム', route('records.home', $user), false);
             $this->items[] = $this->item('記録', route('records.sessions.today', $user), false);
             $this->items[] = $this->item('体組成', route('records.body.index', $user), false);
             $this->items[] = $this->item('グラフ', route('records.graphs.training', $user), false);
             $this->items[] = $this->item('種目', route('records.exercises.index', $user), false);
         } elseif ($user->isActiveStaff()) {
+            $this->items[] = $this->item('利用者', route('staff.clients.index'), $request->routeIs('staff.clients.*'));
             $this->items[] = $this->item('種目', route('staff.exercises.index'), $request->routeIs('staff.exercises.*'));
         }
 
