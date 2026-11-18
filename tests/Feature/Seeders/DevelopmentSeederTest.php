@@ -2,11 +2,14 @@
 
 namespace Tests\Feature\Seeders;
 
+use App\Enums\CoachingNoteCategory;
 use App\Enums\ExerciseScope;
 use App\Enums\UserRole;
 use App\Models\BodyComposition;
+use App\Models\CoachingNote;
 use App\Models\Exercise;
 use App\Models\InvitationCode;
+use App\Models\SessionComment;
 use App\Models\User;
 use App\Models\WorkoutSession;
 use App\Models\WorkoutSet;
@@ -126,6 +129,27 @@ class DevelopmentSeederTest extends TestCase
         // 推定1RMとボリュームは保存時に計算されている
         $this->assertSame(0, WorkoutSet::where('estimated_1rm', '<=', 0)->count());
         $this->assertSame(0, WorkoutSet::where('set_volume', '<=', 0)->count());
+    }
+
+    #[Test]
+    public function 山田太郎の指導メモとセッションコメントのサンプルが作成される(): void
+    {
+        $this->seedAll();
+
+        $client = User::where('email', 'client1@example.com')->firstOrFail();
+        $trainer = User::where('email', 'trainer1@example.com')->firstOrFail();
+
+        $this->assertSame(3, CoachingNote::where('client_user_id', $client->id)->count());
+        $this->assertSame(
+            [CoachingNoteCategory::Caution, CoachingNoteCategory::Goal, CoachingNoteCategory::Injury],
+            CoachingNote::where('client_user_id', $client->id)->get()->map->category->sortBy->value->values()->all(),
+        );
+        $this->assertSame($client->gym_id, CoachingNote::firstOrFail()->gym_id);
+        // トレーナーのコメント、利用者本人の返信、利用者本人のメモ
+        $this->assertSame(3, SessionComment::count());
+        $this->assertTrue(SessionComment::where('created_by', $trainer->id)->whereNull('parent_id')->exists());
+        $this->assertTrue(SessionComment::where('created_by', $client->id)->whereNotNull('parent_id')->exists());
+        $this->assertTrue(SessionComment::where('created_by', $client->id)->whereNull('parent_id')->exists());
     }
 
     #[Test]

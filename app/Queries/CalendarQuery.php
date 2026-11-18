@@ -28,6 +28,7 @@ class CalendarQuery
         $sessions = $client->workoutSessions()
             ->whereBetween('performed_on', [$first->toDateString(), $last->toDateString()])
             ->with('sessionExercises.exercise.bodyPart')
+            ->withCount('comments')
             ->get()
             ->keyBy(fn ($session) => $session->performed_on->toDateString());
 
@@ -56,6 +57,8 @@ class CalendarQuery
                     ->pluck('name')
                     ->values()
                     ->all(),
+                // コメントがある日にマークを付ける（利用者がコメントに気付けるように）
+                'hasComment' => ($session?->comments_count ?? 0) > 0,
                 'hasBody' => $bodyDays->has($key),
                 // 今日・過去日だけ作成できる（未来日は不可）
                 'creatable' => $date <= $today,

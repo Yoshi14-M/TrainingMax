@@ -68,6 +68,16 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * この利用者についての指導メモ（スタッフ専用。利用者本人の画面・データには含めない）。
+     *
+     * @return HasMany<CoachingNote, $this>
+     */
+    public function coachingNotes(): HasMany
+    {
+        return $this->hasMany(CoachingNote::class, 'client_user_id');
+    }
+
+    /**
      * 本人の個人種目。
      *
      * @return HasMany<Exercise, $this>

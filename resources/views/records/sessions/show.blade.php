@@ -33,6 +33,21 @@
         @endif
     </div>
 
+    {{-- 指導メモの要約（スタッフのみ。注意点・怪我・既往歴を折りたたみ表示。利用者には読み込まない） --}}
+    @if ($notes !== null && $notes->isNotEmpty())
+        <details class="mb-4 rounded-xl border border-yellow-300 bg-yellow-50 p-3 text-sm">
+            <summary class="cursor-pointer font-medium">指導メモ（注意点・怪我・既往歴：{{ $notes->count() }}件）</summary>
+            <ul class="mt-2 space-y-2">
+                @foreach ($notes as $note)
+                    <li>
+                        <span class="rounded bg-white px-2 py-0.5 text-xs">{{ $note->category->label() }}</span>
+                        <p class="mt-1 whitespace-pre-wrap">{{ $note->body }}</p>
+                    </li>
+                @endforeach
+            </ul>
+        </details>
+    @endif
+
     {{-- 実施済みの種目ごとのセット一覧 --}}
     @forelse ($sessionExercises as $sessionExercise)
         <section class="mb-6">
@@ -144,4 +159,60 @@
                         :candidates="$candidates" :selected="$initial" :next-number="$nextNumber" :show-step="$nextNumber === 1" :body-weight="$bodyWeight" />
         @endif
     </section>
+
+    {{-- コメント・メモ：スタッフのコメントと利用者本人のトレーニングメモを兼ねる。どちらにも返信できる --}}
+    @if ($canComment || $comments->isNotEmpty())
+        <section id="comments" class="mb-8 scroll-mt-32">
+            <h2 class="mb-1 text-base font-semibold">コメント・メモ</h2>
+            <p class="mb-2 text-xs text-gray-600">トレーナーも利用者本人も書き込めます。トレーニングのメモとしても使えます。</p>
+
+            @foreach ($comments as $comment)
+                <div id="comment-{{ $comment->id }}" class="mb-3 scroll-mt-32 rounded-xl bg-white p-4 shadow">
+                    @include('records.sessions._comment', ['comment' => $comment])
+
+                    {{-- 返信 --}}
+                    @if ($comment->replies->isNotEmpty())
+                        <div class="mt-3 space-y-2 border-l-2 border-gray-200 pl-3">
+                            @foreach ($comment->replies as $reply)
+                                <div id="comment-{{ $reply->id }}" class="scroll-mt-32">
+                                    @include('records.sessions._comment', ['comment' => $reply])
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    @can('reply', $comment)
+                        <details class="mt-3" {{ $replyingTo?->id === $comment->id ? 'open' : '' }}>
+                            <summary class="cursor-pointer text-sm text-blue-700">返信する</summary>
+                            <form method="POST" action="{{ route('records.comments.reply', [$client, $session, $comment]) }}" class="mt-2">
+                                @csrf
+                                <textarea name="body" rows="2" maxlength="1000" required aria-label="返信" @class(['block w-full rounded-md border px-3 py-2 text-base', $errors->reply->has('body') && $replyingTo?->id === $comment->id ? 'border-red-500' : 'border-gray-300'])>{{ $replyingTo?->id === $comment->id ? old('body') : '' }}</textarea>
+                                @if ($replyingTo?->id === $comment->id && $errors->reply->has('body'))
+                                    <p class="mt-1 text-sm text-red-600">{{ $errors->reply->first('body') }}</p>
+                                @endif
+                                <div class="mt-2 flex justify-end">
+                                    <button type="submit" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white">返信する</button>
+                                </div>
+                            </form>
+                        </details>
+                    @endcan
+                </div>
+            @endforeach
+
+            @if ($canComment)
+                <form method="POST" action="{{ route('records.comments.store', [$client, $session]) }}" class="rounded-xl bg-white p-4 shadow">
+                    @csrf
+                    <label for="comment-body" class="mb-1 block text-sm font-medium">コメント・メモを書く</label>
+                    @php($newFormActive = ! $editingComment && ! $replyingTo)
+                    <textarea id="comment-body" name="body" rows="3" maxlength="1000" required @class(['block w-full rounded-md border px-3 py-2 text-base', $errors->has('body') && $newFormActive ? 'border-red-500' : 'border-gray-300'])>{{ $newFormActive ? old('body') : '' }}</textarea>
+                    @if ($newFormActive)
+                        @error('body')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    @endif
+                    <div class="mt-2 flex justify-end">
+                        <button type="submit" class="rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white">書き込む</button>
+                    </div>
+                </form>
+            @endif
+        </section>
+    @endif
 </x-layouts.app>
