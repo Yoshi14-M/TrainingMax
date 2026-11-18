@@ -1,6 +1,5 @@
 <nav class="border-b bg-white" x-data="{ open: false }" aria-label="メインメニュー">
     <div class="mx-auto flex max-w-3xl items-stretch text-sm">
-        <a href="{{ route('home') }}" class="flex-1 py-3 text-center">ホーム</a>
         @foreach ($items as $item)
             <a href="{{ $item['href'] }}" @class(['flex-1 py-3 text-center', 'border-b-2 border-blue-700 font-semibold text-blue-700' => $item['active']])>{{ $item['label'] }}</a>
         @endforeach

@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Records;
 
 use App\Actions\Workout\CreateWorkoutSession;
 use App\Actions\Workout\DeleteWorkoutSession;
+use App\Http\Requests\Records\NewWorkoutSessionRequest;
 use App\Http\Requests\Records\StoreWorkoutSessionRequest;
 use App\Models\Exercise;
 use App\Models\User;
 use App\Models\WorkoutSession;
 use App\Queries\LatestBodyWeightQuery;
 use App\Queries\RecommendationQuery;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -31,6 +33,21 @@ class WorkoutSessionController extends RecordsController
         }
 
         return view('records.sessions.today', ['client' => $client]);
+    }
+
+    /**
+     * 「この日の記録を作成」の確認（カレンダーの日付から。今日・過去日のみ）。既にセッションがあればそれを開く。
+     */
+    public function create(NewWorkoutSessionRequest $request, User $client): View|RedirectResponse
+    {
+        $date = $request->validated('date');
+        $session = $client->workoutSessions()->where('performed_on', $date)->first();
+
+        if ($session !== null) {
+            return redirect()->route('records.sessions.show', [$client, $session]);
+        }
+
+        return view('records.sessions.create', ['client' => $client, 'date' => CarbonImmutable::parse($date)]);
     }
 
     public function store(StoreWorkoutSessionRequest $request, User $client, CreateWorkoutSession $action): RedirectResponse

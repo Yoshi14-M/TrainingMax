@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\Account\GymLinkController;
+use App\Http\Controllers\HomeRedirectController;
 use App\Http\Controllers\Records\BodyCompositionController;
 use App\Http\Controllers\Records\BodyGraphController;
 use App\Http\Controllers\Records\ExerciseController as RecordsExerciseController;
+use App\Http\Controllers\Records\HomeController;
 use App\Http\Controllers\Records\SessionExerciseController;
 use App\Http\Controllers\Records\TrainingGraphController;
 use App\Http\Controllers\Records\WorkoutSessionController;
@@ -20,8 +22,8 @@ use Illuminate\Support\Facades\Route;
 require __DIR__.'/auth.php';
 
 Route::middleware(['auth', 'auth.session', 'verified'])->group(function () {
-    // ログイン後のトップ（暫定。ロール別のトップは後続のイシューで実装する）
-    Route::view('/', 'home')->name('home');
+    // ログイン後のトップ：利用者は自分のホーム、スタッフは利用者一覧へ移す
+    Route::get('/', HomeRedirectController::class)->name('home');
 
     // ジム連携（個人利用者：招待コードで紐付け、ジム所属の利用者：解除）
     Route::get('gym-link', [GymLinkController::class, 'show'])->name('gym-link.show');
@@ -33,7 +35,11 @@ Route::middleware(['auth', 'auth.session', 'verified'])->group(function () {
 
     // 利用者の記録（認可は基底の RecordsController が行う。名前は records.*）
     Route::prefix('clients/{client}')->name('records.')->group(function () {
+        // ホーム（月カレンダー。?month=YYYY-MM）
+        Route::get('/', HomeController::class)->name('home');
+
         // トレーニング記録（セッションのURLは、IDではなく実施日 YYYY-MM-DD）
+        Route::get('sessions/create', [WorkoutSessionController::class, 'create'])->name('sessions.create');
         Route::get('sessions/today', [WorkoutSessionController::class, 'today'])->name('sessions.today');
         Route::post('sessions', [WorkoutSessionController::class, 'store'])->name('sessions.store');
         Route::get('sessions/{workoutSession}', [WorkoutSessionController::class, 'show'])->name('sessions.show');
@@ -60,7 +66,9 @@ Route::middleware(['auth', 'auth.session', 'verified'])->group(function () {
 
     // スタッフ専用（認可は基底の StaffController／OwnerController が行う）
     Route::prefix('staff')->name('staff.')->group(function () {
+        Route::get('clients', [ClientController::class, 'index'])->name('clients.index');
         Route::get('clients/create', [ClientController::class, 'create'])->name('clients.create');
+        Route::get('clients/{client}', [ClientController::class, 'show'])->name('clients.show');
         Route::post('clients', [ClientController::class, 'store'])->name('clients.store');
         Route::post('clients/{client}/initial-password-mail', InitialPasswordMailController::class)
             ->name('clients.initial-password-mail');

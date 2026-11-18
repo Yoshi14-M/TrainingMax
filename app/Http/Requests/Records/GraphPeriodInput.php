@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Records;
 
+use App\Http\Requests\IgnoresInvalidInput;
 use App\Support\Graph\GraphPeriod;
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\Rule;
 
 /**
@@ -12,6 +12,8 @@ use Illuminate\Validation\Rule;
  */
 trait GraphPeriodInput
 {
+    use IgnoresInvalidInput;
+
     /**
      * @return array<string, mixed>
      */
@@ -41,22 +43,6 @@ trait GraphPeriodInput
             'part.exists' => '部位を選択してください。',
             'exercise.integer' => '種目を選択してください。',
         ];
-    }
-
-    /**
-     * 入力エラーでもリダイレクトせず、画面を表示する（不正な値は初期値に置き換える）。
-     */
-    protected function failedValidation(Validator $validator): void
-    {
-        // 何もしない（period()・graphPeriod() が、不正な項目を無視する）
-    }
-
-    /**
-     * 検証に通った項目だけを返す（エラーのある項目は null）。
-     */
-    protected function validInput(string $key): mixed
-    {
-        return $this->validator->errors()->has($key) ? null : $this->input($key);
     }
 
     public function graphPeriod(): GraphPeriod
