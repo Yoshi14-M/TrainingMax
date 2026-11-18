@@ -9,6 +9,8 @@ use App\Actions\Fortify\UpdateUserProfileInformation;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Responses\LoginResponse;
 use App\Http\Responses\PasswordResetLinkResponse;
+use App\Http\Responses\PasswordUpdateResponse;
+use App\Http\Responses\ProfileInformationUpdatedResponse;
 use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -20,6 +22,8 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
+use Laravel\Fortify\Contracts\PasswordUpdateResponse as PasswordUpdateResponseContract;
+use Laravel\Fortify\Contracts\ProfileInformationUpdatedResponse as ProfileInformationUpdatedResponseContract;
 use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Http\Requests\LoginRequest as FortifyLoginRequest;
@@ -36,6 +40,8 @@ class FortifyServiceProvider extends ServiceProvider
 
         $this->app->bind(FortifyLoginRequest::class, LoginRequest::class);
         $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
+        $this->app->singleton(ProfileInformationUpdatedResponseContract::class, ProfileInformationUpdatedResponse::class);
+        $this->app->singleton(PasswordUpdateResponseContract::class, PasswordUpdateResponse::class);
         $this->app->bind(SuccessfulPasswordResetLinkRequestResponse::class, PasswordResetLinkResponse::class);
         $this->app->bind(FailedPasswordResetLinkRequestResponse::class, PasswordResetLinkResponse::class);
     }
