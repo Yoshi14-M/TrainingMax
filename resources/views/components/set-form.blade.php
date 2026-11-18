@@ -91,7 +91,7 @@
     </div>
 
     <div class="mb-4">
-        <label for="reps" class="mb-1 block text-sm font-medium">レップ数</label>
+        <div class="mb-1 flex items-center"><label for="reps" class="block text-sm font-medium">レップ数</label><x-term key="rep" /></div>
         <div class="flex items-stretch gap-2">
             <button type="button" @click="changeReps(-1)" class="w-12 rounded-md border text-lg" aria-label="レップ数を減らす">−</button>
             <input id="reps" name="reps" type="number" inputmode="numeric" step="1" min="1" max="100" required x-model="reps"
@@ -103,7 +103,7 @@
 
     <div class="mb-4 grid grid-cols-2 gap-3">
         <div>
-            <label for="target_rir" class="mb-1 block text-sm font-medium">目標RIR</label>
+            <div class="mb-1 flex items-center"><label for="target_rir" class="block text-sm font-medium">目標RIR</label><x-term key="rir" /></div>
             <select id="target_rir" name="target_rir" x-model.number="targetRir" @change="onTargetRirChange()"
                     class="block w-full rounded-md border px-3 py-2 text-base {{ $errors->has('target_rir') ? 'border-red-500' : 'border-gray-300' }}">
                 @for ($rir = 0; $rir <= 10; $rir++)
@@ -113,7 +113,7 @@
             @error('target_rir')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
         </div>
         <div>
-            <label for="actual_rir" class="mb-1 block text-sm font-medium">実績RIR</label>
+            <div class="mb-1 flex items-center"><label for="actual_rir" class="block text-sm font-medium">実績RIR</label><x-term key="rir" /></div>
             <select id="actual_rir" name="actual_rir" x-model.number="actualRir" @change="actualTouched = true"
                     class="block w-full rounded-md border px-3 py-2 text-base {{ $errors->has('actual_rir') ? 'border-red-500' : 'border-gray-300' }}">
                 @for ($rir = 0; $rir <= 10; $rir++)

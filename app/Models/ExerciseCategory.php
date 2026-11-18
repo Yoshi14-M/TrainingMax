@@ -53,6 +53,18 @@ class ExerciseCategory extends Model
         return $this->rest_seconds.'秒';
     }
 
+    /**
+     * 分類名から、解説する用語のキー（lang/ja/glossary.php）を返す。コンパウンド／アイソレートでなければ null。
+     */
+    public function termKey(): ?string
+    {
+        return match (true) {
+            str_contains($this->name, 'コンパウンド') => 'compound',
+            str_contains($this->name, 'アイソレート') => 'isolation',
+            default => null,
+        };
+    }
+
     private function range(int $min, int $max): string
     {
         return $min === $max ? (string) $min : "{$min}〜{$max}";

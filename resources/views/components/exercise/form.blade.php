@@ -20,7 +20,10 @@
     <x-form.input name="name" label="種目名" :value="$exercise?->name" maxlength="50" autocomplete="off" />
 
     <div class="mb-4">
-        <label for="exercise_category_id" class="mb-1 block text-sm font-medium">分類</label>
+        <div class="mb-1 flex items-center">
+            <label for="exercise_category_id" class="block text-sm font-medium">分類</label>
+            <x-term key="compound" /><x-term key="isolation" />
+        </div>
         <select id="exercise_category_id" name="exercise_category_id" required class="block w-full rounded-md border px-3 py-2 text-base {{ $errors->has('exercise_category_id') ? 'border-red-500' : 'border-gray-300' }}">
             <option value="">選択してください</option>
             @foreach ($categories as $category)

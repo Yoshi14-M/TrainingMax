@@ -4,6 +4,9 @@
         <div class="relative h-80">
             <canvas x-ref="canvas" role="img" aria-label="{{ $label }}のグラフ"></canvas>
         </div>
+        @if ($terms ?? [])
+            <p class="mt-2 text-xs text-gray-700">用語：@foreach ($terms as $term){{ trans("glossary.{$term}.term") }}<x-term :key="$term" />@if (! $loop->last)　@endif @endforeach</p>
+        @endif
         <p class="mt-2 text-xs text-gray-500">点にカーソルを合わせる（スマホはタップする）と、その日の各指標の値が表示されます。凡例を押すと、指標ごとに表示・非表示を切り替えられます。</p>
     </div>
 @else
