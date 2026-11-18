@@ -21,7 +21,7 @@
         <div class="flex items-center justify-between gap-3">
             <div>
                 <p class="text-xs text-gray-600">
-                    休憩タイマー
+                    休憩タイマー<x-term key="interval" />
                     <span x-show="ended" class="font-semibold text-red-600">終了しました</span>
                     {{-- 記録画面以外で作動中のときは、記録画面へ戻るリンクを出す --}}
                     <a x-show="showReturn" :href="savedUrl" class="ml-2 text-blue-700 underline">記録画面へ</a>

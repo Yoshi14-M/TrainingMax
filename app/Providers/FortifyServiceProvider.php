@@ -12,6 +12,7 @@ use App\Http\Responses\PasswordResetLinkResponse;
 use App\Http\Responses\PasswordUpdateResponse;
 use App\Http\Responses\ProfileInformationUpdatedResponse;
 use App\Models\User;
+use App\Support\Audit;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -78,6 +79,8 @@ class FortifyServiceProvider extends ServiceProvider
 
             // パスワードが正しい場合のみ、停止中であることを伝える（停止状態を第三者に推測させないため）
             if ($user->isSuspended()) {
+                Audit::log('login.suspended', ['user_id' => $user->id, 'ip' => $request->ip()]);
+
                 throw ValidationException::withMessages([Fortify::username() => __('auth.suspended')]);
             }
 

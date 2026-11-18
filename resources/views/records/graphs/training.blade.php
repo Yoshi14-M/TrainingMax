@@ -35,6 +35,6 @@
 
         <h2 class="mb-2 text-base font-semibold">{{ $subject }}</h2>
 
-        @include('records.graphs._chart', ['label' => $subject])
+        @include('records.graphs._chart', ['label' => $subject, 'terms' => ['estimated_1rm', 'total_volume', 'set_volume', 'rm']])
     @endif
 </x-layouts.app>

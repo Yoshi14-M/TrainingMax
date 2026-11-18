@@ -470,7 +470,7 @@ class SessionPageTest extends TestCase
 
         $html = $this->page()->getContent();
 
-        $this->assertLessThan(strpos($html, 'セット</th>'), strpos($html, 'この日の記録を削除'));
+        $this->assertLessThan(strpos($html, '重量</th>'), strpos($html, 'この日の記録を削除'));
         $this->assertLessThan(strpos($html, 'この日の記録を削除'), strpos($html, '2026/11/01（日）</h1>'));
         // ページの下部には削除の操作を置かない
         $this->assertSame(1, substr_count($html, 'この日の記録を削除'));

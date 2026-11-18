@@ -68,12 +68,12 @@
                 <table class="w-full text-left text-sm">
                     <thead class="text-xs text-gray-500">
                         <tr>
-                            <th class="px-2 py-1">セット</th>
+                            <th class="px-2 py-1">セット<x-term key="set" /></th>
                             <th class="px-2 py-1">重量</th>
-                            <th class="px-2 py-1">レップ</th>
-                            <th class="px-2 py-1">RIR</th>
-                            <th class="px-2 py-1">推定1RM</th>
-                            <th class="px-2 py-1">ボリューム</th>
+                            <th class="px-2 py-1">レップ<x-term key="rep" /></th>
+                            <th class="px-2 py-1">RIR<x-term key="rir" /></th>
+                            <th class="px-2 py-1">推定1RM<x-term key="estimated_1rm" /></th>
+                            <th class="px-2 py-1">ボリューム<x-term key="set_volume" /></th>
                             <th class="px-2 py-1"><span class="sr-only">操作</span></th>
                         </tr>
                     </thead>
@@ -113,7 +113,7 @@
                     </tbody>
                 </table>
             </div>
-            <p class="mt-1 text-right text-sm">総ボリューム：{{ \App\Support\Format::oneDecimal($sessionExercise->sets->sum('set_volume')) }}</p>
+            <p class="mt-1 text-right text-sm">総ボリューム：{{ \App\Support\Format::oneDecimal($sessionExercise->sets->sum('set_volume')) }}<x-term key="total_volume" /></p>
         </section>
     @empty
         <p class="mb-6 text-sm text-gray-600">まだ種目が記録されていません。下から種目を選んで記録を始めましょう。</p>
@@ -149,6 +149,7 @@
                 <p class="font-medium">{{ $selected->name }}</p>
                 <p class="mt-1 text-sm text-gray-700">
                     {{ $selected->category->name }}／推奨 {{ $selected->category->repsLabel() }}・{{ $selected->category->rirLabel() }}・休憩{{ $selected->category->restLabel() }}
+                    @if ($selected->category->termKey())<x-term :key="$selected->category->termKey()" />@endif<x-term key="rir" />
                 </p>
                 <p class="mt-1 text-sm"><x-youtube-link :name="$selected->name" /></p>
             </div>

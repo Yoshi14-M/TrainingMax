@@ -40,6 +40,7 @@
             <details class="mb-4" @if ($girthOpen) open @endif>
                 <summary class="cursor-pointer text-sm font-medium">周囲径を入力する</summary>
                 <div class="mt-3">
+                    <p class="mb-3 text-xs text-gray-600">周囲径<x-term key="girth" />は、体の各部位を一周した長さです。</p>
                     @foreach ($girths as $field => $definition)
                         <x-form.input :name="$field" :label="$definition['label'].'（'.$definition['unit'].'）'" type="number"
                                       :value="$editing?->{$field}" :required="false" inputmode="decimal" step="0.1"
