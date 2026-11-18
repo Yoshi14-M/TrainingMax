@@ -21,7 +21,7 @@
         <div class="border-b bg-yellow-50 text-sm">
             <div class="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-2 px-4 py-2">
                 <span>▶ {{ $band->name }}さんの記録を表示中</span>
-                <a class="text-blue-700 underline" href="{{ route('home') }}">戻る</a>
+                <a class="text-blue-700 underline" href="{{ route('staff.clients.index') }}">利用者一覧へ戻る</a>
             </div>
         </div>
     @endif

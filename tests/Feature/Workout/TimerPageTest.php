@@ -182,7 +182,7 @@ class TimerPageTest extends TestCase
     {
         // 作動中かどうかはブラウザ（sessionStorage）が持つため、どの画面にもタイマーを組み込み、
         // 作動中・終了後だけ JavaScript が表示する。他の画面では推奨休憩時間（restSeconds）も戻り先のURLもない
-        foreach ([route('records.exercises.index', $this->client), route('home'), route('gym-link.show')] as $url) {
+        foreach ([route('records.exercises.index', $this->client), route('records.home', $this->client), route('gym-link.show')] as $url) {
             $html = $this->actingAs($this->client)->get($url)->getContent();
 
             $this->assertStringContainsString('休憩タイマー', $html, $url);

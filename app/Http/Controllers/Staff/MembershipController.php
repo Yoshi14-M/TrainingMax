@@ -18,6 +18,7 @@ class MembershipController extends StaffController
 
         $action->handle($request->user(), $client);
 
-        return back()->with('status', "{$client->name}さんのジムとの紐付けを解除しました。");
+        // 解除後は、同じジムの利用者ではなくなるため、詳細ではなく一覧へ戻る
+        return redirect()->route('staff.clients.index')->with('status', "{$client->name}さんのジムとの紐付けを解除しました。");
     }
 }

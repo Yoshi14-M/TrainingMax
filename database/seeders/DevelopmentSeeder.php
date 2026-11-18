@@ -43,7 +43,7 @@ class DevelopmentSeeder extends Seeder
 
         // ジム所属の利用者
         $client1 = $this->user('client1@example.com', '山田太郎', UserRole::Client, $gym, $password);
-        $this->user('client2@example.com', '鈴木花子', UserRole::Client, $gym, $password);
+        $client2 = $this->user('client2@example.com', '鈴木花子', UserRole::Client, $gym, $password);
         $this->user('client-pending@example.com', 'パスワード未設定の利用者', UserRole::Client, $gym, null);
 
         // 個人利用者
@@ -53,6 +53,7 @@ class DevelopmentSeeder extends Seeder
         $this->exercises($gym, $client1);
         $this->workouts($client1, $trainer);
         $this->bodyCompositions($client1, $trainer);
+        $this->secondClientRecords($client2, $trainer);
         $this->invitationCode($trainer);
     }
 
@@ -147,6 +148,34 @@ class DevelopmentSeeder extends Seeder
             [3, $client, ['ベンチプレス' => [[65, 6, 2, 2], [65, 6, 1, 1]], 'スクワット' => [[80, 8, 2, 2], [80, 8, 1, 1]]]],
         ];
 
+        $this->recordWorkouts($client, $days);
+    }
+
+    /**
+     * 鈴木花子のサンプル（利用者一覧で、最終トレーニング日の並びを確認するため）。記録が1件もない場合だけ作る。
+     */
+    private function secondClientRecords(User $client, User $trainer): void
+    {
+        if (WorkoutSession::query()->where('user_id', $client->id)->exists()) {
+            return;
+        }
+
+        $this->recordWorkouts($client, [
+            [10, $trainer, ['ベンチプレス' => [[40, 10, 2, 2], [40, 10, 1, 1], [40, 9, 1, 0]], 'サイドレイズ' => [[8, 15, 0, 0]]]],
+        ]);
+
+        $record = new BodyComposition;
+        $record->fill(['measured_on' => now()->subDays(10)->toDateString(), 'weight_kg' => 54.8, 'body_fat_percent' => 24.5]);
+        $record->forceFill(['user_id' => $client->id, 'created_by' => $trainer->id, 'updated_by' => $trainer->id])->save();
+    }
+
+    /**
+     * 利用者のセッション（種目・セット）を作る。
+     *
+     * @param  array<int, array{0: int, 1: User, 2: array<string, array<int, array{0: float|int, 1: int, 2: int, 3: int}>>}>  $days  [何日前, 入力者, [種目名 => セット]]
+     */
+    private function recordWorkouts(User $client, array $days): void
+    {
         foreach ($days as [$daysAgo, $author, $exercises]) {
             $session = new WorkoutSession;
             $session->forceFill([
