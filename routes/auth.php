@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\DemoLoginController;
 use App\Http\Controllers\Auth\InitialPasswordController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
@@ -46,4 +47,11 @@ Route::middleware('auth')->group(function () {
 Route::middleware('guest')->group(function () {
     Route::get('/initial-password/{token}', [InitialPasswordController::class, 'show'])->name('initial-password.show');
     Route::post('/initial-password', [InitialPasswordController::class, 'store'])->name('initial-password.store');
+});
+
+// デモ環境（DEMO_MODE=true）のみ：ロールを選んでデモ用アカウントにログイン。それ以外は 404
+Route::middleware(['guest', 'throttle:10,1'])->group(function () {
+    Route::post('/demo-login/{account}', DemoLoginController::class)
+        ->whereIn('account', array_keys(config('demo.accounts')))
+        ->name('demo.login');
 });

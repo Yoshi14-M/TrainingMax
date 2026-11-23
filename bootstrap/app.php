@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureUserIsNotSuspended;
+use App\Http\Middleware\GuardDemoAccounts;
 use App\Http\Middleware\SetSecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -20,7 +21,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // 停止確認は web グループ全体にかける（ルートへの付け忘れを防ぐ）
         $middleware->web(append: [
             EnsureUserIsNotSuspended::class,
+            // デモ環境（DEMO_MODE=true）だけ、デモ用アカウントを壊す操作などを止める
+            GuardDemoAccounts::class,
         ]);
+
+        // Render などの PaaS は、ロードバランサーで HTTPS を終端して HTTP で転送する。
+        // X-Forwarded-Proto を信頼し、URL・Cookie を https として扱う
+        $middleware->trustProxies(at: '*');
 
         // セキュリティヘッダーは全レスポンス（404 などルートに一致しないものも含む）に付ける
         $middleware->append(SetSecurityHeaders::class);

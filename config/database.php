@@ -38,8 +38,9 @@ return [
             'database' => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-            'busy_timeout' => null,
-            'journal_mode' => null,
+            // 公開用（SQLite で複数の閲覧者が同時に書き込む）では、待ち時間と WAL を env で指定する
+            'busy_timeout' => env('DB_BUSY_TIMEOUT'),
+            'journal_mode' => env('DB_JOURNAL_MODE'),
             'synchronous' => null,
             'transaction_mode' => 'DEFERRED',
         ],

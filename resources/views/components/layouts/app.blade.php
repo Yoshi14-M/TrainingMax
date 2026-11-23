@@ -8,6 +8,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
+    @if (config('demo.enabled'))
+        <div class="bg-blue-700 px-4 py-1.5 text-center text-xs text-white" role="note">{{ __('demo.banner') }}</div>
+    @endif
     <header class="sticky top-0 z-20 bg-white shadow-sm">
         <div class="mx-auto max-w-3xl px-4 pt-3">
             <a href="{{ route('home') }}" class="text-lg font-bold tracking-tight">{{ config('app.name') }}</a>

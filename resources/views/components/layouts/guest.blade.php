@@ -8,6 +8,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
+    @if (config('demo.enabled'))
+        <div class="bg-blue-700 px-4 py-1.5 text-center text-xs text-white" role="note">{{ __('demo.banner') }}</div>
+    @endif
     <main class="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4 py-8">
         <p class="mb-6 text-center text-2xl font-bold tracking-tight">{{ config('app.name') }}</p>
 
