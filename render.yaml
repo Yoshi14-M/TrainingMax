@@ -1,0 +1,52 @@
+# Render Blueprint（https://render.com/docs/blueprint-spec）
+# Render の画面で「New → Blueprint」からこのリポジトリを選ぶと、以下の設定で Web Service が作られる。
+# APP_KEY・APP_URL は sync: false（値はリポジトリに置かず、作成時に画面で入力する）。
+services:
+  - type: web
+    name: trainingmax-demo
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /up
+    autoDeploy: true
+    envVars:
+      - key: APP_KEY
+        sync: false # ローカルで `php artisan key:generate --show` の出力（base64:...）を入力
+      - key: APP_URL
+        sync: false # 例：https://trainingmax-demo.onrender.com
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_LOCALE
+        value: ja
+      - key: APP_TIMEZONE
+        value: Asia/Tokyo
+      - key: DEMO_MODE
+        value: "true"
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /app/database/database.sqlite
+      - key: DB_BUSY_TIMEOUT
+        value: "5000"
+      - key: DB_JOURNAL_MODE
+        value: wal
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: MAIL_MAILER
+        value: log
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: warning
+      - key: SEED_OWNER_EMAIL
+        value: owner@example.com
