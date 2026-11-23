@@ -16,6 +16,8 @@ services:
         sync: false # ローカルで `php artisan key:generate --show` の出力（base64:...）を入力
       - key: APP_URL
         sync: false # 例：https://trainingmax-demo.onrender.com
+      - key: APP_NAME
+        value: TrainingMax
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
